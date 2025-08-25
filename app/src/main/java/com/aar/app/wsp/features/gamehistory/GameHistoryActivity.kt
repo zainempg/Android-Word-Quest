@@ -12,10 +12,10 @@ import com.aar.app.wsp.R
 import com.aar.app.wsp.WordSearchApp
 import com.aar.app.wsp.commons.goneIf
 import com.aar.app.wsp.custom.easyadapter.MultiTypeAdapter
+import com.aar.app.wsp.databinding.ActivityGameHistoryBinding
 import com.aar.app.wsp.features.FullscreenActivity
 import com.aar.app.wsp.features.gameplay.GamePlayActivity
 import com.aar.app.wsp.model.GameDataInfo
-import kotlinx.android.synthetic.main.activity_game_history.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,17 +24,18 @@ class GameHistoryActivity : FullscreenActivity() {
     lateinit var viewModelFactory: ViewModelProvider.Factory
     private val viewModel: GameHistoryViewModel by viewModels { viewModelFactory }
     private val adapter: MultiTypeAdapter = MultiTypeAdapter()
+    val binding by lazy {   ActivityGameHistoryBinding.inflate(layoutInflater)}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_game_history)
+        setContentView(binding.root)
         (application as WordSearchApp).appComponent.inject(this)
 
         initRecyclerView()
         viewModel.onGameDataInfoLoaded.observe(this) { gameDataInfoList: List<GameDataInfo> ->
             onGameDataInfoLoaded(gameDataInfoList)
         }
-        btnClear.setOnClickListener {
+        binding.btnClear.setOnClickListener {
             lifecycleScope.launch { viewModel.clear() }
         }
     }
@@ -47,7 +48,7 @@ class GameHistoryActivity : FullscreenActivity() {
     }
 
     private fun onGameDataInfoLoaded(gameDataInfoList: List<GameDataInfo>) {
-        textEmpty.goneIf(gameDataInfoList.isNotEmpty())
+        binding.textEmpty.goneIf(gameDataInfoList.isNotEmpty())
         adapter.setItems(gameDataInfoList)
     }
 
@@ -66,9 +67,9 @@ class GameHistoryActivity : FullscreenActivity() {
         }
 
         adapter.addDelegate(gameDataAdapterDelegate)
-        recyclerView.adapter = adapter
-        recyclerView.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
-        recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
+        binding.recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
     }
 
     private fun deleteGameData(gameDataInfo: GameDataInfo) {

@@ -18,11 +18,12 @@ import com.aar.app.wsp.commons.gone
 import com.aar.app.wsp.commons.visible
 import com.aar.app.wsp.custom.easyadapter.MultiTypeAdapter
 import com.aar.app.wsp.custom.easyadapter.SimpleAdapterDelegate
+import com.aar.app.wsp.databinding.ActivityGamePlayBinding
+import com.aar.app.wsp.databinding.ActivityThemeSelectorBinding
 import com.aar.app.wsp.features.FullscreenActivity
 import com.aar.app.wsp.features.gamethemeselector.ThemeSelectorViewModel.ResponseType
 import com.aar.app.wsp.model.GameTheme
 import io.reactivex.disposables.Disposable
-import kotlinx.android.synthetic.main.activity_theme_selector.*
 import javax.inject.Inject
 
 class ThemeSelectorActivity : FullscreenActivity() {
@@ -31,12 +32,16 @@ class ThemeSelectorActivity : FullscreenActivity() {
     var mViewModelFactory: ViewModelProvider.Factory? = null
     lateinit var viewModel: ThemeSelectorViewModel
 
+
     private val adapter = MultiTypeAdapter()
 
     private var mUpdateDisposable: Disposable? = null
+
+    val binding by lazy {   ActivityThemeSelectorBinding.inflate(layoutInflater)}
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_theme_selector)
+        setContentView(binding.root)
         (application as WordSearchApp).appComponent.inject(this)
 
         initViews()
@@ -48,10 +53,10 @@ class ThemeSelectorActivity : FullscreenActivity() {
     }
 
     private fun initViews() {
-        btnAllTheme.setOnClickListener {
+        binding.btnAllTheme.setOnClickListener {
             onItemClick(GameTheme.NONE.id)
         }
-        btnUpdate.setOnClickListener {
+        binding.btnUpdate.setOnClickListener {
             onUpdateClick()
         }
     }
@@ -60,8 +65,8 @@ class ThemeSelectorActivity : FullscreenActivity() {
         viewModel = ViewModelProviders.of(this, mViewModelFactory).get(ThemeSelectorViewModel::class.java)
         viewModel.onGameThemeLoaded.observe(this) { gameThemes: List<GameThemeItem>? ->
             adapter.setItems(gameThemes)
-            rvThemes.visible()
-            progressBar.gone()
+            binding.rvThemes.visible()
+            binding.progressBar.gone()
         }
     }
 
@@ -84,9 +89,9 @@ class ThemeSelectorActivity : FullscreenActivity() {
             }
         )
 
-        rvThemes.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        rvThemes.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
-        rvThemes.adapter = adapter
+        binding.rvThemes.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        binding. rvThemes.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
+        binding.rvThemes.adapter = adapter
     }
 
     override fun onStop() {
@@ -95,13 +100,13 @@ class ThemeSelectorActivity : FullscreenActivity() {
     }
 
     private fun onUpdateClick() {
-        loadingLayout.visibility = View.VISIBLE
-        btnUpdate.isEnabled = false
+        binding.loadingLayout.visibility = View.VISIBLE
+        binding.btnUpdate.isEnabled = false
         mUpdateDisposable = viewModel.updateData()
             .subscribe({ responseType: ResponseType ->
                 updateRevisionNumber()
-                loadingLayout.visibility = View.GONE
-                btnUpdate.isEnabled = true
+                binding.loadingLayout.visibility = View.GONE
+                binding.btnUpdate.isEnabled = true
                 val message = if (responseType == ResponseType.NoUpdate) {
                     getString(R.string.up_to_date)
                 } else {
@@ -114,8 +119,8 @@ class ThemeSelectorActivity : FullscreenActivity() {
                     .show()
             }
             ) {
-                loadingLayout.visibility = View.GONE
-                btnUpdate.isEnabled = true
+                binding.loadingLayout.visibility = View.GONE
+                binding.btnUpdate.isEnabled = true
                 Toast.makeText(
                     this@ThemeSelectorActivity,
                     R.string.err_no_connect,
@@ -125,8 +130,8 @@ class ThemeSelectorActivity : FullscreenActivity() {
     }
 
     private fun loadData() {
-        rvThemes.gone()
-        progressBar.visible()
+        binding.rvThemes.gone()
+        binding.progressBar.visible()
         viewModel.loadThemes()
     }
 
@@ -153,7 +158,7 @@ class ThemeSelectorActivity : FullscreenActivity() {
     }
 
     private fun updateRevisionNumber() {
-        textRev.text =
+        binding.textRev.text =
             if (viewModel.lastDataRevision > 0) viewModel.lastDataRevision.toString()
             else "-"
     }

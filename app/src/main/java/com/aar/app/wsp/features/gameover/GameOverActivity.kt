@@ -11,10 +11,11 @@ import androidx.lifecycle.observe
 import com.aar.app.wsp.R
 import com.aar.app.wsp.WordSearchApp
 import com.aar.app.wsp.commons.DurationFormatter.fromInteger
+import com.aar.app.wsp.databinding.ActivityGameHistoryBinding
+import com.aar.app.wsp.databinding.ActivityGameOverBinding
 import com.aar.app.wsp.features.FullscreenActivity
 import com.aar.app.wsp.features.gameplay.GamePlayActivity
 import com.aar.app.wsp.model.GameData
-import kotlinx.android.synthetic.main.activity_game_over.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,11 +23,12 @@ class GameOverActivity : FullscreenActivity() {
     @JvmField
     @Inject
     var mViewModelFactory: ViewModelProvider.Factory? = null
+    val binding by lazy {   ActivityGameOverBinding.inflate(layoutInflater)}
 
     private lateinit var viewModel: GameOverViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_game_over)
+        setContentView(binding.root)
         (application as WordSearchApp).appComponent.inject(this)
         viewModel = ViewModelProviders.of(this, mViewModelFactory).get(GameOverViewModel::class.java)
         viewModel.onGameDataLoaded.observe(this) { gameData ->
@@ -45,10 +47,10 @@ class GameOverActivity : FullscreenActivity() {
             lifecycleScope.launch { viewModel.loadData(gameId) }
         }
 
-        main_menu_btn.setOnClickListener {
+        binding.mainMenuBtn.setOnClickListener {
             onBackPressed()
         }
-        btnReplay.setOnClickListener {
+        binding.btnReplay.setOnClickListener {
             lifecycleScope.launch {
                 viewModel.resetCurrentGameData()
             }
@@ -70,17 +72,17 @@ class GameOverActivity : FullscreenActivity() {
 
     private fun showGameStat(gd: GameData) {
         if (gd.isGameOver) {
-            textCongrat.setText(R.string.lbl_game_over)
-            game_stat_text.visibility = View.GONE
+            binding.textCongrat.setText(R.string.lbl_game_over)
+            binding. gameStatText.visibility = View.GONE
         } else {
             val strGridSize = gd.grid!!.rowCount.toString() + " x " + gd.grid!!.colCount
             var str = getString(R.string.finish_text)
             str = str.replace(":gridSize".toRegex(), strGridSize)
             str = str.replace(":uwCount".toRegex(), gd.usedWords.size.toString())
             str = str.replace(":duration".toRegex(), fromInteger(gd.duration))
-            textCongrat.setText(R.string.congratulations)
-            game_stat_text.visibility = View.VISIBLE
-            game_stat_text.text = str
+            binding.textCongrat.setText(R.string.congratulations)
+            binding.gameStatText.visibility = View.VISIBLE
+            binding.gameStatText.text = str
         }
     }
 

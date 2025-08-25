@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
 import com.aar.app.wsp.R
+import com.aar.app.wsp.databinding.ActivityGamePlayBinding
+import com.aar.app.wsp.databinding.ActivityMainMenuBinding
 import com.aar.app.wsp.features.FullscreenActivity
 import com.aar.app.wsp.features.gamehistory.GameHistoryActivity
 import com.aar.app.wsp.features.gameplay.GamePlayActivity
@@ -15,35 +17,35 @@ import com.aar.app.wsp.model.Difficulty
 import com.aar.app.wsp.model.GameMode
 import com.aar.app.wsp.model.GameTheme
 import com.github.abdularis.horizontalspinner.HorizontalSelector.OnSelectedItemChanged
-import kotlinx.android.synthetic.main.activity_main_menu.*
 
 class MainMenuActivity : FullscreenActivity() {
 
     private val gameRoundDimValues: IntArray by lazy {
         resources.getIntArray(R.array.game_round_dimension_values)
     }
+    val binding by lazy {   ActivityMainMenuBinding.inflate(layoutInflater)}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main_menu)
+        setContentView(binding.root)
 
-        imageEnjoy.startAnimation(AnimationUtils.loadAnimation(this, R.anim.tag_enjoy))
-        selectorGameMode.onSelectedItemChangedListener = object : OnSelectedItemChanged {
+        binding.imageEnjoy.startAnimation(AnimationUtils.loadAnimation(this, R.anim.tag_enjoy))
+        binding.selectorGameMode.onSelectedItemChangedListener = object : OnSelectedItemChanged {
             override fun onSelectedItemChanged(newItem: String?) {
                 if (newItem == getString(R.string.mode_count_down) || newItem == getString(R.string.mode_marathon)) {
-                    selectorDifficulty.visibility = View.VISIBLE
+                    binding.selectorDifficulty.visibility = View.VISIBLE
                 } else {
-                    selectorDifficulty.visibility = View.GONE
+                    binding.selectorDifficulty.visibility = View.GONE
                 }
             }
         }
-        btnSettings.setOnClickListener {
+        binding.btnSettings.setOnClickListener {
             goToSetting()
         }
-        btnNewGame.setOnClickListener {
+        binding.btnNewGame.setOnClickListener {
             newGame()
         }
-        btnHistory.setOnClickListener {
+        binding.btnHistory.setOnClickListener {
             goToHistory()
         }
     }
@@ -89,8 +91,8 @@ class MainMenuActivity : FullscreenActivity() {
 
     private val gameModeFromSpinner: GameMode
         get() {
-            if (selectorGameMode.currentValue != null) {
-                return when (selectorGameMode.currentValue) {
+            if (binding.selectorGameMode.currentValue != null) {
+                return when (binding.selectorGameMode.currentValue) {
                     getString(R.string.mode_hidden) -> GameMode.Hidden
                     getString(R.string.mode_count_down) -> GameMode.CountDown
                     getString(R.string.mode_marathon) -> GameMode.Marathon
@@ -102,8 +104,8 @@ class MainMenuActivity : FullscreenActivity() {
 
     private val difficultyFromSpinner: Difficulty
         get() {
-            if (selectorDifficulty.currentValue != null) {
-                return when (selectorDifficulty.currentValue) {
+            if (binding.selectorDifficulty.currentValue != null) {
+                return when (binding.selectorDifficulty.currentValue) {
                     getString(R.string.diff_easy) -> Difficulty.Easy
                     getString(R.string.diff_medium) -> Difficulty.Medium
                     else -> Difficulty.Hard
@@ -113,5 +115,5 @@ class MainMenuActivity : FullscreenActivity() {
         }
 
     private val gridSizeDimension: Int
-        get() = gameRoundDimValues[selectorGridSize.currentIndex]
+        get() = gameRoundDimValues[binding.selectorGridSize.currentIndex]
 }

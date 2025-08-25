@@ -41,9 +41,12 @@
                 tools:text="Loading Text..."/>
         </LinearLayout>
 
-        <include layout="@layout/partial_game_content"/>
+        <include
+            android:id="@+id/partial_game_content"
+            layout="@layout/partial_game_content"/>
 
         <include
+            android:id="@+id/partial_game_complete"
             layout="@layout/partial_game_complete"
             android:visibility="gone"/>
 
