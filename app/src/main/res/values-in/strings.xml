@@ -71,4 +71,7 @@
     <string name="privacy_policy">Kebijakan Privasi</string>
     <string name="summ_reverse_match">Izinkan pencarian/seleksi kata secara terbalik</string>
     <string name="summ_del_finish">Hapus data permainan setelah selesai</string>
+    <string name="ad_attribution">Ad</string>
+    <string name="admob_app_id" translatable="false">ca-app-pub-3940256099942544~3347511713</string>
+
 </resources>

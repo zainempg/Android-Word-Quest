@@ -4,24 +4,27 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.aar.app.wsp.R
 import com.aar.app.wsp.WordSearchApp
 import com.aar.app.wsp.commons.gone
 import com.aar.app.wsp.commons.visible
+import com.aar.app.wsp.custom.easyadapter.AdapterDelegate
 import com.aar.app.wsp.custom.easyadapter.MultiTypeAdapter
 import com.aar.app.wsp.custom.easyadapter.SimpleAdapterDelegate
-import com.aar.app.wsp.databinding.ActivityGamePlayBinding
 import com.aar.app.wsp.databinding.ActivityThemeSelectorBinding
 import com.aar.app.wsp.features.FullscreenActivity
 import com.aar.app.wsp.features.gamethemeselector.ThemeSelectorViewModel.ResponseType
+import com.aar.app.wsp.model.GameData
 import com.aar.app.wsp.model.GameTheme
 import io.reactivex.disposables.Disposable
 import javax.inject.Inject
@@ -181,3 +184,21 @@ class ThemeSelectorActivity : FullscreenActivity() {
         const val EXTRA_COL_COUNT = "col_count"
     }
 }
+fun interface Listener {
+    fun onClick(file: GameData)
+}
+
+
+object EmptySpaceModel
+
+class VHEmptySpace(
+// For ViewBinding: private val binding: EmptySpaceRowBinding
+itemView: View
+) : RecyclerView.ViewHolder(itemView) {
+    // No binding logic needed if it's just an empty space.
+    // The layout XML itself defines the appearance.
+    fun bind() {
+        // Nothing to do here typically
+    }
+}
+

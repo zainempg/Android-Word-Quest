@@ -156,7 +156,7 @@ class GamePlayViewModel @Inject constructor(
                 Flowable.fromIterable(words)
                     .distinct(Word::string)
                     .map { word: Word ->
-                        word.string = word.string.toUpperCase(Locale.getDefault())
+                        word.string = word.string.uppercase(Locale.getDefault())
                         word
                     }
                     .toList()

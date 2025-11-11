@@ -20,7 +20,7 @@
     <string name="about">About</string>
     <string name="saved_game">Saved game data</string>
     <string name="enable_sound">Enable Sound</string>
-    <string name="about_credit">Developer: Abdul Aris R.</string>
+    <string name="about_credit">Developer: Develpors Era</string>
     <string name="delete_finish">Delete Finish</string>
     <string name="enable_fullscreen">Fullscreen</string>
     <string name="auto_scale_grid">Auto Scale Grid</string>
@@ -77,4 +77,8 @@
     <string name="privacy_policy">Privacy Policy</string>
     <string name="summ_reverse_match">Allow reverse word selection</string>
     <string name="summ_del_finish">Delete game data when it finished</string>
+    <string name="ad_attribution">Ad</string>
+    <string name="admob_app_id" translatable="false">ca-app-pub-3940256099942544~3347511713</string>
+
+
 </resources>

@@ -66,7 +66,7 @@
 
         <Preference android:title="@string/privacy_policy">
             <intent android:action="android.intent.action.VIEW"
-                    android:data="https://abdularis.com/app/wsp/privacy_policy.html"/>
+                    android:data="https://abdularis.com/app/wsp/privacy_policy.tml"/>
         </Preference>
 
         <Preference

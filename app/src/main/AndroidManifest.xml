@@ -30,6 +30,7 @@
         </activity>
         <activity
             android:name="com.aar.app.wsp.features.SplashScreenActivity"
+            android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/SplashScreenTheme">
             <intent-filter>
@@ -52,6 +53,13 @@
         </activity>
         <activity android:name="com.aar.app.wsp.features.gamethemeselector.ThemeSelectorActivity">
         </activity>
+
+        <meta-data
+            android:name="applovin.sdk.key"
+            android:value="QMgx-pwqy2qkp_l50mshcAnD4ViKvh4UAQh2e4ldgSV4e2hVJyeBbgEOe2AI44stT2lvH3mrNhV3dZVADcKc8e" /> <!-- Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="@string/admob_app_id" />
     </application>
 
 </manifest>
