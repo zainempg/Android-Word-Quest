@@ -1,98 +1,123 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
-
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.kapt")      // ✅ یہ ضروری ہے
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0" // ✅ Kotlin 2.0 کے بعد لازمی
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
+}
 
 android {
+    namespace 'com.aar.app.wsp'
     compileSdkVersion 36
+
     defaultConfig {
         applicationId "com.aar.app.wsp"
         minSdkVersion 23
-        //noinspection OldTargetApi
         targetSdkVersion 35
         versionCode 2
         versionName "1.0"
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
-        debug {
-        }
+        debug { }
         release {
             shrinkResources true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    viewBinding {
-        enabled = true
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.15"
     }
-    namespace 'com.aar.app.wsp'
+
+    buildFeatures {
+        compose true
+        viewBinding true
+    }
 }
 
 dependencies {
+    // 🔹 Core & Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.0.0"
+    implementation "androidx.core:core-ktx:1.13.1"
 
-    implementation("com.google.android.gms:play-services-ads:24.6.0")
+    // 🔹 Jetpack Compose (using BOM)
+    def composeBom = platform('androidx.compose:compose-bom:2024.10.00')
+    implementation composeBom
+    androidTestImplementation composeBom
 
-    implementation"androidx.ads:ads-identifier:1.0.0-alpha05"
+    implementation "androidx.compose.ui:ui"
+    implementation "androidx.compose.foundation:foundation"
+    implementation "androidx.compose.material3:material3"
+    implementation "androidx.activity:activity-compose:1.9.3"
+    implementation "androidx.navigation:navigation-compose:2.8.4"
+    implementation "io.coil-kt:coil-compose:2.7.0"
+    debugImplementation "androidx.compose.ui:ui-tooling"
+
+    // 🔹 AndroidX & Material
+    implementation "androidx.appcompat:appcompat:1.7.0"
+    implementation "androidx.constraintlayout:constraintlayout:2.1.4"
+    implementation "androidx.recyclerview:recyclerview:1.3.2"
+    implementation "com.google.android.material:material:1.13.0"
+
+    // 🔹 Lifecycle & ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4"
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.8.4"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"  // KTX extensions
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
+
+
+    // 🔹 Room
+    implementation "androidx.room:room-runtime:2.6.1"
+    implementation "androidx.room:room-ktx:2.6.1"
+    kapt "androidx.room:room-compiler:2.6.1"
 
 
 
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9"
+    // 🔹 Dagger
+    implementation "com.google.dagger:dagger:2.51.1"
+    kapt "com.google.dagger:dagger-compiler:2.51.1"
 
-    implementation 'com.google.firebase:firebase-core:17.5.0'
-
-    implementation 'com.intuit.ssp:ssp-android:1.0.6'
-    implementation 'com.intuit.sdp:sdp-android:1.0.6'
-
-    implementation 'com.google.dagger:dagger:2.24'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.browser:browser:1.2.0'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
-
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.2.0'
-    implementation "androidx.fragment:fragment-ktx:1.2.5"
-
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.16'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
-    implementation 'com.google.android.flexbox:flexbox:3.0.0'
-    implementation 'androidx.room:room-rxjava2:2.2.5'
-    implementation 'androidx.room:room-runtime:2.2.5'
-    implementation "androidx.room:room-ktx:2.2.5"
-
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.6.4'
+    // 🔹 Retrofit & RxJava
+    implementation "com.squareup.retrofit2:retrofit:2.9.0"
+    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+    implementation "io.reactivex.rxjava2:rxjava:2.2.21"
+    implementation "io.reactivex.rxjava2:rxandroid:2.1.1"
+    implementation "androidx.room:room-rxjava2:2.6.1"
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
-    implementation project(':horizontalspinner')
 
-    implementation(platform("com.google.firebase:firebase-bom:34.3.0")) // Or the latest BoM version
+
+    // 🔹 Firebase (with BoM)
+    implementation platform("com.google.firebase:firebase-bom:34.3.0")
+    implementation "com.google.firebase:firebase-analytics"
     implementation "com.google.firebase:firebase-crashlytics"
-    implementation "com.google.firebase:firebase-analytics"
-    implementation "com.google.firebase:firebase-analytics"
     implementation "com.google.firebase:firebase-config"
 
-    kapt 'androidx.room:room-compiler:2.2.5'
-    kapt 'com.google.dagger:dagger-compiler:2.24'
+    // 🔹 Google Ads
+    implementation "com.google.android.gms:play-services-ads:24.6.0"
+    implementation "androidx.ads:ads-identifier:1.0.0-alpha05"
 
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
-    implementation "androidx.core:core-ktx:1.3.1"
+    // 🔹 Utility Libraries
+    implementation "com.intuit.ssp:ssp-android:1.0.6"
+    implementation "com.intuit.sdp:sdp-android:1.0.6"
+    implementation "com.google.android.flexbox:flexbox:3.0.0"
 
-    testImplementation 'junit:junit:4.13'
-    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
+    // 🔹 Local Module
+    implementation project(":horizontalspinner")
+
+    // 🔹 Testing
+    testImplementation "junit:junit:4.13.2"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.6.1"
 }
-
-apply plugin: 'com.google.gms.google-services'

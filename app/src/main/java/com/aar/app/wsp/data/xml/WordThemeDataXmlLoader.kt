@@ -6,13 +6,10 @@ import com.aar.app.wsp.model.GameTheme
 import com.aar.app.wsp.model.Word
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import org.xml.sax.InputSource
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.util.*
-import javax.xml.parsers.SAXParserFactory
 
-// Class to load both XML and JSON word/theme files from assets
+// Class to load only JSON word/theme files from assets
 class WordThemeDataXmlLoader(context: Context) {
 
     private val assetManager: AssetManager = context.assets
@@ -37,8 +34,8 @@ class WordThemeDataXmlLoader(context: Context) {
     }
 
     private fun loadData() {
-        _words = ArrayList()
-        _gameThemes = ArrayList()
+        _words = mutableListOf()
+        _gameThemes = mutableListOf()
 
         var themeId = 1
         var wordId = 1
@@ -51,29 +48,12 @@ class WordThemeDataXmlLoader(context: Context) {
                 return
             }
 
-            files?.forEach { fileName ->
-                val path = "$BASE_FOLDER/$fileName"
-
-                when {
-                    fileName.endsWith(".json", ignoreCase = true) -> {
-                        android.util.Log.d("Loader", "Loading JSON: $path")
-                        loadJson(path, themeId, wordId).apply {
-                            themeId = this.first
-                            wordId = this.second
-                        }
-                    }
-
-                    fileName.endsWith(".xml", ignoreCase = true) -> {
-                        android.util.Log.d("Loader", "Loading XML: $path")
-                        loadXml(path, themeId, wordId).apply {
-                            themeId = this.first
-                            wordId = this.second
-                        }
-                    }
-
-                    else -> {
-                        android.util.Log.d("Loader", "Skipping unsupported file: $fileName")
-                    }
+            files.forEach { fileName ->
+                if (fileName.endsWith(".json", ignoreCase = true)) {
+                    android.util.Log.d("Loader", "Loading JSON: $fileName")
+                    val ids = loadJson("$BASE_FOLDER/$fileName", themeId, wordId)
+                    themeId = ids.first
+                    wordId = ids.second
                 }
             }
 
@@ -90,43 +70,19 @@ class WordThemeDataXmlLoader(context: Context) {
         val gson = Gson()
         val reader = BufferedReader(InputStreamReader(assetManager.open(path)))
         val type = object : TypeToken<JsonThemeResponse>() {}.type
-
         val themeResponse: JsonThemeResponse = gson.fromJson(reader, type)
 
+        // Add theme
         val theme = GameTheme(themeId, themeResponse.name)
         _gameThemes!!.add(theme)
 
+        // Add words
         themeResponse.words.forEach { str ->
             _words!!.add(Word(wordId, themeId, str))
             wordId++
         }
 
         themeId++
-        return Pair(themeId, wordId)
-    }
-
-    // Load XML file
-    private fun loadXml(path: String, startThemeId: Int, startWordId: Int): Pair<Int, Int> {
-        var themeId = startThemeId
-        var wordId = startWordId
-
-        val parser = SAXParserFactory.newInstance().newSAXParser().xmlReader
-        val handler = SaxWordThemeHandler(startThemeId, startWordId)
-        // Make sure SaxWordThemeHandler supports default constructor
-
-        parser.contentHandler = handler
-        parser.parse(InputSource(assetManager.open(path)))
-
-        handler.gameThemes?.forEach {
-            _gameThemes!!.add(it)
-            themeId++
-        }
-
-        handler.words?.forEach {
-            _words!!.add(it)
-            wordId++
-        }
-
         return Pair(themeId, wordId)
     }
 

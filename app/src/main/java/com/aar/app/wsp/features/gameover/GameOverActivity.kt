@@ -3,9 +3,9 @@ package com.aar.app.wsp.features.gameover
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
 import androidx.core.app.NavUtils
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import com.aar.app.wsp.R
@@ -25,12 +25,16 @@ class GameOverActivity : FullscreenActivity() {
     var mViewModelFactory: ViewModelProvider.Factory? = null
     val binding by lazy {   ActivityGameOverBinding.inflate(layoutInflater)}
 
-    private lateinit var viewModel: GameOverViewModel
+    private  lateinit var viewModel: GameOverViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         (application as WordSearchApp).appComponent.inject(this)
-        viewModel = ViewModelProviders.of(this, mViewModelFactory).get(GameOverViewModel::class.java)
+
+
+         viewModel = ViewModelProvider(this)[GameOverViewModel::class.java]
+
+
         viewModel.onGameDataLoaded.observe(this) { gameData ->
             gameData?.let {
                 showGameStat(it)

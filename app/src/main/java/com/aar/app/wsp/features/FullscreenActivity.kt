@@ -20,7 +20,7 @@ import javax.inject.Inject
 open class FullscreenActivity : AppCompatActivity() {
 
     @Inject
-    protected lateinit var preferences: Preferences
+     lateinit var preferences: Preferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
