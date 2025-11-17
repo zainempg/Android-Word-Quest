@@ -1,12 +1,12 @@
 package com.aar.app.wsp.features.mainmenu
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,8 +23,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
@@ -40,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aar.app.wsp.R.drawable.*
 import com.aar.app.wsp.R
+import com.aar.app.wsp.features.gamehistory.GameHistoryActivity
+import com.aar.app.wsp.features.settings.SettingsActivity
 
 
 class MainMenuActivityCompose : ComponentActivity() {
@@ -50,85 +50,93 @@ class MainMenuActivityCompose : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            GridSize()
+            MainMenuScreen(
+
+                onSettingClicked = { startActivity(Intent(applicationContext, SettingsActivity::class.java)) },
+                onHistoryClicked ={ startActivity(Intent(applicationContext, GameHistoryActivity::class.java))}
+            )
         }
     }
 
 }
 
 @RequiresApi(Build.VERSION_CODES.Q)
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Box(
+fun MainMenuScreen(
+    onSettingClicked: () -> Unit = {},
+    onHistoryClicked: () -> Unit = {}
 ) {
-    Image(
-        painter = painterResource(id = main_activity_bg), // 👉 replace with your image
-        contentDescription = null,
-        modifier = Modifier
-            .fillMaxSize(),
-        contentScale = ContentScale.Crop // or FillBounds if needed
-    )
-    androidx.compose.foundation.layout.Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.1f))
-    )
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 20.dp),
-        verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
 
+    Box(modifier = Modifier.fillMaxSize()) {
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-
-                .padding(
-                    top = WindowInsets.statusBars
-                        .asPaddingValues()
-                        .calculateTopPadding() + 10.dp,
-                    start = 20.dp,
-                    end = 20.dp
-                ),
-            horizontalArrangement = Arrangement.Absolute.Center,
-            verticalAlignment = Alignment.CenterVertically
-
+        // Background Image
+        Image(
+            painter = painterResource(id = main_activity_bg),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
-        {
-            Image(
-                painter = painterResource(id = word_search), // 👉 replace with your image
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth(),
-                contentScale = ContentScale.Crop
-            ) // or FillBounds if needed
-        }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            GridSize()
-            GameMode()
-            PlayButton()
-            Row(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(horizontal = 30.dp)
-                    .padding(top = 30.dp),
-                horizontalArrangement = Arrangement.Absolute.SpaceEvenly
-            ) {
-                CircleMenuButton(icon = R.drawable.ic_settings)
 
-                CircleMenuButton(icon = R.drawable.ic_settings)
+        // Transparent Black Layer
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.1f))
+        )
+
+        // Full UI Column
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 20.dp),
+            verticalArrangement = Arrangement.SpaceEvenly,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            // Header Image
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 10.dp,
+                        start = 20.dp,
+                        end = 20.dp
+                    ),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = word_search),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.Crop
+                )
             }
 
-        }
+            // Components
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                GridSize()
+                GameMode()
+                PlayButton()
 
+                // Bottom buttons (settings, history etc.)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp)
+                        .padding(top = 30.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    CircleMenuButton(icon = ic_settings,onClick = onHistoryClicked)
+                    CircleMenuButton(icon = ic_settings, onClick = onSettingClicked)
+                }
+            }
+        }
     }
 }
-
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -443,36 +451,6 @@ fun RoundIconButton(
 @Composable
 fun GameHomeScreenPreview() {
 
-    Box()
-}
-
-
-@Composable
-fun RoundButton(text: String, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(Color(0xFF7BE86A))
-            .clickable { onClick() }
-            .padding(vertical = 12.dp, horizontal = 16.dp)
-    ) {
-        Text(text = text, color = Color.White, fontWeight = FontWeight.Bold)
-    }
-}
-
-@Composable
-fun ModeButton(text: String, selected: Boolean) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(if (selected) Color(0xFF7BE86A) else Color(0xFFBEE7FF))
-            .padding(vertical = 12.dp, horizontal = 20.dp)
-    ) {
-        Text(
-            text = text,
-            color = if (selected) Color.White else Color(0xFF8AA4B3),
-            fontWeight = FontWeight.Bold
-        )
-    }
+    MainMenuScreen()
 }
 
