@@ -294,43 +294,57 @@ fun GameContent(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Word pills - give it weight to take space
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(0.35f),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            WordPills(
-                words = gameData.usedWords,
-                gameMode = gameData.gameMode,
-                kidsFont = kidsFont
-            )
-        }
+        // Word pills
+        WordPills(
+            words = gameData.usedWords,
+            gameMode = gameData.gameMode,
+            kidsFont = kidsFont
+        )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
         // Letter Board (using AndroidView to embed custom view)
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.65f)
+                .aspectRatio(1f)
                 .clip(RoundedCornerShape(24.dp))
                 .border(6.dp, Color(0xFFFEC84D), RoundedCornerShape(24.dp))
                 .background(Color(0xFFB8E6F6))
-                .padding(12.dp),
+                .padding(4.dp),
             contentAlignment = Alignment.Center
         ) {
             val density = LocalDensity.current
             val availableWidthPx = constraints.maxWidth
             val availableHeightPx = constraints.maxHeight
             val gridSizePx = minOf(availableWidthPx, availableHeightPx)
-            val gridSizeDp = with(density) { gridSizePx.toDp() }
 
             // Calculate cell size based on grid dimensions
             val rowCount = gameData.grid?.rowCount ?: 5
             val colCount = gameData.grid?.colCount ?: 5
-            val cellSizePx = gridSizePx / maxOf(rowCount, colCount)
+            val maxDim = maxOf(rowCount, colCount)
+            
+            // Default cell size is 50px, calculate scale to fit available space
+            val defaultCellSize = 50
+            val defaultGridSize = defaultCellSize * maxDim
+            val scaleFactor = gridSizePx.toFloat() / defaultGridSize.toFloat()
+
+            // Streak line colors with transparency (alpha ~50%) so overlapping lines are visible
+            val streakColors = intArrayOf(
+                android.graphics.Color.parseColor("#80FF3EA5"), // Pink
+                android.graphics.Color.parseColor("#804FC3F7"), // Light blue
+                android.graphics.Color.parseColor("#8066BB6A"), // Green
+                android.graphics.Color.parseColor("#80FFA726"), // Orange
+                android.graphics.Color.parseColor("#80AB47BC"), // Purple
+                android.graphics.Color.parseColor("#80EF5350"), // Red
+                android.graphics.Color.parseColor("#8026C6DA"), // Cyan
+                android.graphics.Color.parseColor("#80FFEE58"), // Yellow
+                android.graphics.Color.parseColor("#808D6E63"), // Brown
+                android.graphics.Color.parseColor("#805C6BC0"), // Indigo
+            )
+
+            // Track the current color index based on answered words
+            val answeredCount = gameData.usedWords.count { it.isAnswered }
 
             AndroidView(
                 factory = { context ->
@@ -346,10 +360,27 @@ fun GameContent(
                         gridLineBackground.visibility = android.view.View.VISIBLE
                         streakView.isSnapToGrid = preferences?.snapToGrid ?: StreakView.SnapType.ALWAYS_SNAP
 
+                        // Scale the board to fit available space using proper scale method
+                        scale(scaleFactor, scaleFactor)
+
+                        // Add existing streak lines for answered words first
+                        gameData.usedWords.filter { it.isAnswered }.forEachIndexed { index, usedWord ->
+                            usedWord.answerLine?.let { line ->
+                                val streakLine = StreakView.StreakLine().apply {
+                                    startIndex.set(line.startRow, line.startCol)
+                                    endIndex.set(line.endRow, line.endCol)
+                                    // Use saved color or assign based on index
+                                    color = if (line.color != 0) line.color else streakColors[index % streakColors.size]
+                                }
+                                addStreakLine(streakLine)
+                            }
+                        }
+
                         // Set selection listener
                         selectionListener = object : LetterBoard.OnLetterSelectionListener {
                             override fun onSelectionBegin(streakLine: StreakView.StreakLine, str: String) {
-                                streakLine.color = android.graphics.Color.parseColor("#FF3EA5")
+                                // Use answered count for color - this gets updated via recomposition
+                                streakLine.color = streakColors[answeredCount % streakColors.size]
                             }
 
                             override fun onSelectionDrag(streakLine: StreakView.StreakLine, str: String) {
@@ -366,32 +397,33 @@ fun GameContent(
                                 onWordSelected(str, answerLine, preferences?.reverseMatching() ?: false)
                             }
                         }
-
-                        // Add existing streak lines for answered words
-                        gameData.usedWords.filter { it.isAnswered }.forEach { usedWord ->
-                            usedWord.answerLine?.let { line ->
-                                val streakLine = StreakView.StreakLine().apply {
-                                    startIndex.set(line.startRow, line.startCol)
-                                    endIndex.set(line.endRow, line.endCol)
-                                    color = line.color
-                                }
-                                addStreakLine(streakLine)
-                            }
-                        }
                     }
                 },
                 update = { letterBoard ->
-                    // Scale the board to fill available space
-                    letterBoard.post {
-                        val currentWidth = letterBoard.width
-                        if (currentWidth > 0 && gridSizePx > 0) {
-                            val scale = gridSizePx.toFloat() / currentWidth.toFloat()
-                            letterBoard.scaleX = scale
-                            letterBoard.scaleY = scale
+                    // Update the selection listener with new color index
+                    letterBoard.selectionListener = object : LetterBoard.OnLetterSelectionListener {
+                        override fun onSelectionBegin(streakLine: StreakView.StreakLine, str: String) {
+                            // Use current answered count for color
+                            val currentAnsweredCount = gameData.usedWords.count { it.isAnswered }
+                            streakLine.color = streakColors[currentAnsweredCount % streakColors.size]
+                        }
+
+                        override fun onSelectionDrag(streakLine: StreakView.StreakLine, str: String) {
+                            // Update during drag
+                        }
+
+                        override fun onSelectionEnd(streakLine: StreakView.StreakLine, str: String) {
+                            val answerLine = AnswerLine(
+                                streakLine.startIndex.row,
+                                streakLine.startIndex.col,
+                                streakLine.endIndex.row,
+                                streakLine.endIndex.col
+                            )
+                            onWordSelected(str, answerLine, preferences?.reverseMatching() ?: false)
                         }
                     }
                 },
-                modifier = Modifier.size(gridSizeDp)
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
