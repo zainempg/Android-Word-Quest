@@ -36,7 +36,7 @@ import com.aar.app.wsp.R
 import com.aar.app.wsp.features.gamehistory.GameHistoryActivity
 import com.aar.app.wsp.features.gamethemeselector.ThemeSelectorActivityCompose
 import com.aar.app.wsp.features.settings.SettingsActivity
-import com.aar.app.wsp.features.gameplay.GamePlayActivity
+import com.aar.app.wsp.features.gameplay.GamePlayActivityCompose
 import com.aar.app.wsp.model.Difficulty
 import com.aar.app.wsp.model.GameMode
 import com.aar.app.wsp.model.GameTheme
@@ -65,12 +65,12 @@ class MainMenuActivityCompose : ComponentActivity() {
     }
 
     private fun startNewGame(gameThemeId: Int) {
-        val intent = Intent(this, GamePlayActivity::class.java).apply {
-            putExtra(GamePlayActivity.EXTRA_GAME_DIFFICULTY, pendingDifficulty)
-            putExtra(GamePlayActivity.EXTRA_GAME_MODE, pendingGameMode)
-            putExtra(GamePlayActivity.EXTRA_GAME_THEME_ID, gameThemeId)
-            putExtra(GamePlayActivity.EXTRA_ROW_COUNT, pendingGridSize)
-            putExtra(GamePlayActivity.EXTRA_COL_COUNT, pendingGridSize)
+        val intent = Intent(this, GamePlayActivityCompose::class.java).apply {
+            putExtra(GamePlayActivityCompose.EXTRA_GAME_DIFFICULTY, pendingDifficulty)
+            putExtra(GamePlayActivityCompose.EXTRA_GAME_MODE, pendingGameMode)
+            putExtra(GamePlayActivityCompose.EXTRA_GAME_THEME_ID, gameThemeId)
+            putExtra(GamePlayActivityCompose.EXTRA_ROW_COUNT, pendingGridSize)
+            putExtra(GamePlayActivityCompose.EXTRA_COL_COUNT, pendingGridSize)
         }
         startActivity(intent)
     }

@@ -21,6 +21,10 @@
             android:screenOrientation="portrait">
         </activity>
         <activity
+            android:name="com.aar.app.wsp.features.gameplay.GamePlayActivityCompose"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
             android:name="com.aar.app.wsp.features.mainmenu.MainMenuActivity"
             android:screenOrientation="portrait">
         </activity>

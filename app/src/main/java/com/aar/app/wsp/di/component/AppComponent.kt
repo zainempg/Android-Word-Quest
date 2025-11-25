@@ -7,6 +7,7 @@ import com.aar.app.wsp.features.FullscreenActivity
 import com.aar.app.wsp.features.gamehistory.GameHistoryActivity
 import com.aar.app.wsp.features.gameover.GameOverActivity
 import com.aar.app.wsp.features.gameplay.GamePlayActivity
+import com.aar.app.wsp.features.gameplay.GamePlayActivityCompose
 import com.aar.app.wsp.features.gamethemeselector.ThemeSelectorActivity
 import com.aar.app.wsp.features.gamethemeselector.ThemeSelectorActivityCompose
 import com.aar.app.wsp.features.mainmenu.MainMenuActivity
@@ -20,6 +21,7 @@ import javax.inject.Singleton
 @Component(modules = [AppModule::class, DataSourceModule::class, ViewModelModule::class])
 interface AppComponent {
     fun inject(activity: GamePlayActivity)
+    fun inject(activity: GamePlayActivityCompose)
     fun inject(activity: MainMenuActivity)
     fun inject(activity: GameOverActivity)
     fun inject(activity: FullscreenActivity)
