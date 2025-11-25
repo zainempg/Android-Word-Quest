@@ -115,7 +115,7 @@ fun MainMenuScreen(
     var selectedGameMode by remember { mutableStateOf(GameMode.Normal) }
     var selectedDifficulty by remember { mutableStateOf(Difficulty.Easy) }
 
-    val gameRoundDimValues = listOf(3, 4, 5, 6)
+    val gameRoundDimValues = listOf(4, 5, 6)
     val gridSizeDimension = gameRoundDimValues[selectedGridIndex]
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -160,7 +160,7 @@ fun MainMenuScreen(
                     selectedGridIndex = newIndex
                 }
 
-                GameMode(
+                GameModeSelector(
                     selectedGameMode = selectedGameMode,
                     selectedDifficulty = selectedDifficulty
                 ) { newMode, newDiff ->
@@ -194,7 +194,7 @@ fun MainMenuScreen(
 @Composable
 fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
     val kidsFont = FontFamily(Font(R.font.knewave_regular))
-    val gameRoundDimValues = listOf(3, 4, 5, 6)
+    val gameRoundDimValues = listOf(4, 5, 6)  // Must match MainMenuScreen
 
     Box(modifier = Modifier.fillMaxWidth()) {
         Image(
@@ -257,12 +257,33 @@ fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
 }
 
 @Composable
-fun GameMode(
+fun GameModeSelector(
     selectedGameMode: GameMode,
     selectedDifficulty: Difficulty,
     onChange: (GameMode, Difficulty) -> Unit
 ) {
     val kidsFont = FontFamily(Font(R.font.knewave_regular))
+
+    // All available game modes and difficulties
+    val gameModes = listOf(GameMode.Normal, GameMode.Hidden, GameMode.CountDown, GameMode.Marathon)
+    val difficulties = listOf(Difficulty.Easy, Difficulty.Medium, Difficulty.Hard)
+
+    // Get display names
+    val gameModeNames = mapOf(
+        GameMode.Normal to "NORMAL",
+        GameMode.Hidden to "HIDDEN",
+        GameMode.CountDown to "COUNTDOWN",
+        GameMode.Marathon to "MARATHON"
+    )
+    val difficultyNames = mapOf(
+        Difficulty.Easy to "EASY",
+        Difficulty.Medium to "MEDIUM",
+        Difficulty.Hard to "HARD"
+    )
+
+    // Current indices
+    val currentModeIndex = gameModes.indexOf(selectedGameMode)
+    val currentDiffIndex = difficulties.indexOf(selectedDifficulty)
 
     Box(modifier = Modifier.fillMaxWidth()) {
         Image(
@@ -291,16 +312,19 @@ fun GameMode(
                 )
             }
 
+            // Game Mode Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 0f, boxSize = 30.dp) {
-                    onChange(GameMode.Hidden, selectedDifficulty)
+                    // Go to previous mode (wrap around)
+                    val newIndex = if (currentModeIndex > 0) currentModeIndex - 1 else gameModes.size - 1
+                    onChange(gameModes[newIndex], selectedDifficulty)
                 }
                 Text(
-                    text = "RELAX",
+                    text = gameModeNames[selectedGameMode] ?: "NORMAL",
                     style = TextStyle(
                         fontFamily = kidsFont,
                         fontSize = 20.sp,
@@ -309,20 +333,25 @@ fun GameMode(
                     )
                 )
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f, boxSize = 30.dp) {
-                    onChange(GameMode.CountDown, selectedDifficulty)
+                    // Go to next mode (wrap around)
+                    val newIndex = if (currentModeIndex < gameModes.size - 1) currentModeIndex + 1 else 0
+                    onChange(gameModes[newIndex], selectedDifficulty)
                 }
             }
 
+            // Difficulty Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 0f, boxSize = 30.dp) {
-                    onChange(selectedGameMode, Difficulty.Easy)
+                    // Go to previous difficulty (wrap around)
+                    val newIndex = if (currentDiffIndex > 0) currentDiffIndex - 1 else difficulties.size - 1
+                    onChange(selectedGameMode, difficulties[newIndex])
                 }
                 Text(
-                    text = "EASY",
+                    text = difficultyNames[selectedDifficulty] ?: "EASY",
                     style = TextStyle(
                         fontFamily = kidsFont,
                         fontSize = 20.sp,
@@ -331,7 +360,9 @@ fun GameMode(
                     )
                 )
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f, boxSize = 30.dp) {
-                    onChange(selectedGameMode, Difficulty.Medium)
+                    // Go to next difficulty (wrap around)
+                    val newIndex = if (currentDiffIndex < difficulties.size - 1) currentDiffIndex + 1 else 0
+                    onChange(selectedGameMode, difficulties[newIndex])
                 }
             }
         }
@@ -344,22 +375,18 @@ fun PlayButton(text: String = "PLAY", onClick: () -> Unit) {
 
     Box(
         modifier = Modifier
-            .clickable { onClick() }
-            .padding(10.dp)
-            .wrapContentSize(),
+            .width(260.dp)
+            .height(65.dp)
+            .clip(RoundedCornerShape(40.dp))
+            .background(Color(0xFFFEC84D))
+            .clickable{ onClick() }
+            .padding(5.dp),
         contentAlignment = Alignment.Center
     ) {
+
         Box(
             modifier = Modifier
-                .height(70.dp)
-                .width(220.dp)
-                .clip(RoundedCornerShape(40.dp))
-                .background(Color(0xFFFFD64A))
-        )
-        Box(
-            modifier = Modifier
-                .height(64.dp)
-                .width(210.dp)
+                .fillMaxSize()
                 .clip(RoundedCornerShape(40.dp))
                 .background(Color(0xFFFF3EA5))
         )
@@ -385,15 +412,12 @@ fun CircleMenuButton(icon: Int, size: Dp = 70.dp, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(size)
+            .clip(CircleShape)
+            .background(Color(0xFFFFD64A))
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .size(size)
-                .clip(CircleShape)
-                .background(Color(0xFFFFD64A))
-        )
+
         Box(
             modifier = Modifier
                 .size(size - 10.dp)

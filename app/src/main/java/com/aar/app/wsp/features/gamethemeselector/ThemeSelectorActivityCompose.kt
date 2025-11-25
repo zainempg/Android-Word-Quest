@@ -331,7 +331,7 @@ fun CategoryItem(
             .padding(horizontal = 20.dp, vertical = 6.dp)
             .height(75.dp)
             .clip(RoundedCornerShape(40.dp))
-            .background(Color(0xFFFEC84D))
+            .background(Color(0xFFF3BC41))
             .clickable { onClick() }
     ) {
         Box(

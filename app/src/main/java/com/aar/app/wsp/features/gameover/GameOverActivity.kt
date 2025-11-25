@@ -20,19 +20,19 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class GameOverActivity : FullscreenActivity() {
-    @JvmField
     @Inject
-    var mViewModelFactory: ViewModelProvider.Factory? = null
-    val binding by lazy {   ActivityGameOverBinding.inflate(layoutInflater)}
+    lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    private  lateinit var viewModel: GameOverViewModel
+    private val binding by lazy { ActivityGameOverBinding.inflate(layoutInflater) }
+    private lateinit var viewModel: GameOverViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         (application as WordSearchApp).appComponent.inject(this)
 
-
-         viewModel = ViewModelProvider(this)[GameOverViewModel::class.java]
+        // Use the injected factory to create ViewModel with dependencies
+        viewModel = ViewModelProvider(this, viewModelFactory)[GameOverViewModel::class.java]
 
 
         viewModel.onGameDataLoaded.observe(this) { gameData ->
