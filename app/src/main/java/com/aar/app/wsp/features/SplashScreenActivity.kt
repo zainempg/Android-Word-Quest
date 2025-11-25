@@ -4,12 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.aar.app.wsp.features.mainmenu.MainMenuActivity
+import com.aar.app.wsp.features.mainmenu.MainMenuActivityCompose
 
 class SplashScreenActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         startActivity(
-            Intent(this, MainMenuActivity::class.java)
+            Intent(this, MainMenuActivityCompose::class.java)
         )
         finish()
     }

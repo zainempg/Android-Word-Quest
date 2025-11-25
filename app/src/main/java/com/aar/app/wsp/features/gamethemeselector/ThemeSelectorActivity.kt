@@ -2,6 +2,7 @@ package com.aar.app.wsp.features.gamethemeselector
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,7 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,10 +32,9 @@ import com.aar.app.wsp.model.GameTheme
 import io.reactivex.disposables.Disposable
 import javax.inject.Inject
 
-class ThemeSelectorActivity : FullscreenActivity() {
-    @JvmField
+class ThemeSelectorActivity() : ComponentActivity() {
     @Inject
-    var mViewModelFactory: ViewModelProvider.Factory? = null
+    lateinit var mViewModelFactory: ViewModelProvider.Factory
     lateinit var viewModel: ThemeSelectorViewModel
 
 

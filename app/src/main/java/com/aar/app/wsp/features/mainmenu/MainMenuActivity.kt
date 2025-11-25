@@ -71,7 +71,7 @@ class MainMenuActivity : FullscreenActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 100 && resultCode == Activity.RESULT_OK) {
+        if (requestCode == 100 && resultCode == RESULT_OK) {
             startNewGame(
                 data!!.getIntExtra(ThemeSelectorActivity.EXTRA_THEME_ID, GameTheme.NONE.id)
             )

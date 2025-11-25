@@ -8,6 +8,7 @@ import com.aar.app.wsp.features.gamehistory.GameHistoryActivity
 import com.aar.app.wsp.features.gameover.GameOverActivity
 import com.aar.app.wsp.features.gameplay.GamePlayActivity
 import com.aar.app.wsp.features.gamethemeselector.ThemeSelectorActivity
+import com.aar.app.wsp.features.gamethemeselector.ThemeSelectorActivityCompose
 import com.aar.app.wsp.features.mainmenu.MainMenuActivity
 import dagger.Component
 import javax.inject.Singleton
@@ -24,4 +25,5 @@ interface AppComponent {
     fun inject(activity: FullscreenActivity)
     fun inject(activity: GameHistoryActivity)
     fun inject(activity: ThemeSelectorActivity)
+    fun inject(activity: ThemeSelectorActivityCompose)
 }

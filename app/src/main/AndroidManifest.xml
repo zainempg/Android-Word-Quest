@@ -57,6 +57,10 @@
         </activity>
         <activity android:name="com.aar.app.wsp.features.gamethemeselector.ThemeSelectorActivity">
         </activity>
+        <activity
+            android:name="com.aar.app.wsp.features.gamethemeselector.ThemeSelectorActivityCompose"
+            android:screenOrientation="portrait">
+        </activity>
 
         <meta-data
             android:name="applovin.sdk.key"
