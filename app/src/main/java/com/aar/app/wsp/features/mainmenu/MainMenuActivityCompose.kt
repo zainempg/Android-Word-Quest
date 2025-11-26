@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -18,10 +19,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -30,6 +35,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aar.app.wsp.R
@@ -183,8 +189,8 @@ fun MainMenuScreen(
                         .padding(horizontal = 30.dp, vertical = 20.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    CircleMenuButton(icon = R.drawable.ic_settings, onClick = onSettingClicked)
-                    CircleMenuButton(icon = R.drawable.ic_settings, onClick = onHistoryClicked)
+                    CircleMenuButton(icon = R.drawable.ic_history, onClick = onHistoryClicked)
+                    CircleMenuButton(icon = R.drawable.ic_settings_gold, onClick = onSettingClicked)
                 }
             }
         }
@@ -211,19 +217,13 @@ fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
                     .padding(top = 20.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text(
+                OutlinedText(
                     text = "GRID SIZE",
-                    style = TextStyle(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = kidsFont,
-                        color = Color.White,
-                        shadow = Shadow(
-                            color = Color(0xFFEC4899),
-                            blurRadius = 8f,
-                            offset = Offset(0f, 4f)
-                        )
-                    )
+                    fontSize = 20.sp,
+                    fontFamily = kidsFont,
+                    fillColor = Color.White,
+                    strokeColor = Color(0xFFEC4899),
+                    strokeWidth = 6f
                 )
             }
 
@@ -238,14 +238,13 @@ fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
                     if (selectedIndex > 0) onIndexChange(selectedIndex - 1)
                 }
 
-                Text(
+                OutlinedText(
                     text = "${gameRoundDimValues[selectedIndex]} x ${gameRoundDimValues[selectedIndex]}",
-                    style = TextStyle(
-                        fontSize = 40.sp,
-                        fontFamily = kidsFont,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                    fontSize = 40.sp,
+                    fontFamily = kidsFont,
+                    fillColor = Color.White,
+                    strokeColor = Color(0xFF333333),
+                    strokeWidth = 10f
                 )
 
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f) {
@@ -270,7 +269,7 @@ fun GameModeSelector(
 
     // Get display names
     val gameModeNames = mapOf(
-        GameMode.Normal to "NORMAL",
+        GameMode.Normal to "RELAX",
         GameMode.Hidden to "HIDDEN",
         GameMode.CountDown to "COUNTDOWN",
         GameMode.Marathon to "MARATHON"
@@ -300,15 +299,13 @@ fun GameModeSelector(
                     .padding(top = 20.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text(
+                OutlinedText(
                     text = "GAME MODE",
-                    style = TextStyle(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = kidsFont,
-                        color = Color.White,
-                        shadow = Shadow(Color(0xFFEC4899), blurRadius = 8f, offset = Offset(0f, 4f))
-                    )
+                    fontSize = 20.sp,
+                    fontFamily = kidsFont,
+                    fillColor = Color.White,
+                    strokeColor = Color(0xFFEC4899),
+                    strokeWidth = 6f
                 )
             }
 
@@ -323,14 +320,13 @@ fun GameModeSelector(
                     val newIndex = if (currentModeIndex > 0) currentModeIndex - 1 else gameModes.size - 1
                     onChange(gameModes[newIndex], selectedDifficulty)
                 }
-                Text(
-                    text = gameModeNames[selectedGameMode] ?: "NORMAL",
-                    style = TextStyle(
-                        fontFamily = kidsFont,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                OutlinedText(
+                    text = gameModeNames[selectedGameMode] ?: "RELAX",
+                    fontSize = 20.sp,
+                    fontFamily = kidsFont,
+                    fillColor = Color.White,
+                    strokeColor = Color(0xFF333333),
+                    strokeWidth = 6f
                 )
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f, boxSize = 30.dp) {
                     // Go to next mode (wrap around)
@@ -350,14 +346,13 @@ fun GameModeSelector(
                     val newIndex = if (currentDiffIndex > 0) currentDiffIndex - 1 else difficulties.size - 1
                     onChange(selectedGameMode, difficulties[newIndex])
                 }
-                Text(
+                OutlinedText(
                     text = difficultyNames[selectedDifficulty] ?: "EASY",
-                    style = TextStyle(
-                        fontFamily = kidsFont,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                    fontSize = 20.sp,
+                    fontFamily = kidsFont,
+                    fillColor = Color.White,
+                    strokeColor = Color(0xFF333333),
+                    strokeWidth = 6f
                 )
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f, boxSize = 30.dp) {
                     // Go to next difficulty (wrap around)
@@ -390,44 +385,80 @@ fun PlayButton(text: String = "PLAY", onClick: () -> Unit) {
                 .clip(RoundedCornerShape(40.dp))
                 .background(Color(0xFFFF3EA5))
         )
-        Text(
+        OutlinedText(
             text = text,
-            style = TextStyle(
-                fontSize = 32.sp,
-                fontFamily = kidsFont,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.White,
-                shadow = Shadow(
-                    color = Color(0xFFCE2D88),
-                    blurRadius = 18f,
-                    offset = Offset(0f, 4f)
-                )
-            )
+            fontSize = 32.sp,
+            fontFamily = kidsFont,
+            fillColor = Color.White,
+            strokeColor = Color(0xFF333333),
+            strokeWidth = 10f
         )
     }
 }
 
 @Composable
-fun CircleMenuButton(icon: Int, size: Dp = 70.dp, onClick: () -> Unit) {
+fun CircleMenuButton(icon: Int, size: Dp = 60.dp, onClick: () -> Unit) {
+    // Golden button style matching the design
     Box(
         modifier = Modifier
             .size(size)
             .clip(CircleShape)
-            .background(Color(0xFFFFD64A))
+            .background(Color(0xFFD4A017)) // Darker gold border
+            .border(3.dp, Color(0xFFB8860B), CircleShape) // Dark golden border
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
-
+        // Inner golden circle
         Box(
             modifier = Modifier
-                .size(size - 10.dp)
+                .size(size - 8.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFFF3EA5))
+                .background(Color(0xFFFFD700)) // Bright gold
         )
         Image(
             painter = painterResource(id = icon),
             contentDescription = null,
-            modifier = Modifier.size(size * 0.45f)
+            modifier = Modifier.size(size * 0.5f)
+        )
+    }
+}
+
+// Outlined text composable for text with black border
+@Composable
+fun OutlinedText(
+    text: String,
+    fontSize: TextUnit,
+    fontFamily: FontFamily,
+    modifier: Modifier = Modifier,
+    fillColor: Color = Color.White,
+    strokeColor: Color = Color.Black,
+    strokeWidth: Float = 8f
+) {
+    Box(modifier = modifier) {
+        // Stroke/outline layer
+        Text(
+            text = text,
+            style = TextStyle(
+                fontSize = fontSize,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.Bold,
+                color = strokeColor,
+                drawStyle = Stroke(
+                    width = strokeWidth,
+                    join = StrokeJoin.Round,
+                    cap = StrokeCap.Round
+                )
+            )
+        )
+        // Fill layer
+        Text(
+            text = text,
+            style = TextStyle(
+                fontSize = fontSize,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.Bold,
+                color = fillColor
+            )
         )
     }
 }
