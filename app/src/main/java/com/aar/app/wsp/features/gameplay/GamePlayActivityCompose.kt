@@ -436,13 +436,14 @@ fun GameHeader(
     totalWords: Int,
     kidsFont: FontFamily
 ) {
+    Spacer(Modifier.height(10.dp))
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
             .clip(RoundedCornerShape(28.dp))
             .background(Color(0xFFFEE440))
-            .padding(horizontal = 8.dp, vertical = 6.dp)
+            .padding(horizontal = 8.dp, vertical = 6.dp,)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),

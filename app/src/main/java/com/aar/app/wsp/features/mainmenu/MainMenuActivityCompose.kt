@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -83,6 +84,7 @@ class MainMenuActivityCompose : ComponentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         setContent {
@@ -143,6 +145,7 @@ fun MainMenuScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .statusBarsPadding()
                 .padding(bottom = 20.dp),
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -230,22 +233,27 @@ fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 5.dp),
-                horizontalArrangement = Arrangement.SpaceAround,
+                    .padding(top = 5.dp, start = 16.dp, end = 16.dp),
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 0f) {
                     if (selectedIndex > 0) onIndexChange(selectedIndex - 1)
                 }
 
-                OutlinedText(
-                    text = "${gameRoundDimValues[selectedIndex]} x ${gameRoundDimValues[selectedIndex]}",
-                    fontSize = 60.sp,
-                    fontFamily = kidsFont,
-                    fillColor = Color.White,
-                    strokeColor = Color(0xFFEC4899),
-                    strokeWidth = 12f
-                )
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    OutlinedText(
+                        text = "${gameRoundDimValues[selectedIndex]} x ${gameRoundDimValues[selectedIndex]}",
+                        fontSize = 60.sp,
+                        fontFamily = kidsFont,
+                        fillColor = Color.White,
+                        strokeColor = Color(0xFFEC4899),
+                        strokeWidth = 12f
+                    )
+                }
 
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f) {
                     if (selectedIndex < gameRoundDimValues.size - 1) onIndexChange(selectedIndex + 1)
@@ -311,8 +319,10 @@ fun GameModeSelector(
 
             // Game Mode Row
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 40.dp),
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 0f, boxSize = 30.dp) {
@@ -320,14 +330,19 @@ fun GameModeSelector(
                     val newIndex = if (currentModeIndex > 0) currentModeIndex - 1 else gameModes.size - 1
                     onChange(gameModes[newIndex], selectedDifficulty)
                 }
-                OutlinedText(
-                    text = gameModeNames[selectedGameMode] ?: "RELAX",
-                    fontSize = 20.sp,
-                    fontFamily = kidsFont,
-                    fillColor = Color.White,
-                    strokeColor = Color(0xFFEC4899),
-                    strokeWidth = 10f
-                )
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    OutlinedText(
+                        text = gameModeNames[selectedGameMode] ?: "RELAX",
+                        fontSize = 15.sp,
+                        fontFamily = kidsFont,
+                        fillColor = Color.White,
+                        strokeColor = Color(0xFFEC4899),
+                        strokeWidth = 10f
+                    )
+                }
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f, boxSize = 30.dp) {
                     // Go to next mode (wrap around)
                     val newIndex = if (currentModeIndex < gameModes.size - 1) currentModeIndex + 1 else 0
@@ -337,8 +352,10 @@ fun GameModeSelector(
 
             // Difficulty Row
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 50.dp),
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 0f, boxSize = 30.dp) {
@@ -346,14 +363,19 @@ fun GameModeSelector(
                     val newIndex = if (currentDiffIndex > 0) currentDiffIndex - 1 else difficulties.size - 1
                     onChange(selectedGameMode, difficulties[newIndex])
                 }
-                OutlinedText(
-                    text = difficultyNames[selectedDifficulty] ?: "EASY",
-                    fontSize = 20.sp,
-                    fontFamily = kidsFont,
-                    fillColor = Color.White,
-                    strokeColor = Color(0xFFEC4899),
-                    strokeWidth = 10f
-                )
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    OutlinedText(
+                        text = difficultyNames[selectedDifficulty] ?: "EASY",
+                        fontSize = 15.sp,
+                        fontFamily = kidsFont,
+                        fillColor = Color.White,
+                        strokeColor = Color(0xFFEC4899),
+                        strokeWidth = 10f
+                    )
+                }
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f, boxSize = 30.dp) {
                     // Go to next difficulty (wrap around)
                     val newIndex = if (currentDiffIndex < difficulties.size - 1) currentDiffIndex + 1 else 0
@@ -414,7 +436,7 @@ fun OutlinedText(
                 letterSpacing = letterSpacing,
                 color = Color(0xFFEC4899),
                 drawStyle = Stroke(
-                    width = strokeWidth + 10f,
+                    width = strokeWidth + 15f,
                     join = StrokeJoin.Round,
                     cap = StrokeCap.Round
                 )
