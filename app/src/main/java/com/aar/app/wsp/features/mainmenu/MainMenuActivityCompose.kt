@@ -220,20 +220,17 @@ fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
                     .padding(top = 20.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-                OutlinedText(
-                    text = "GRID SIZE",
-                    fontSize = 20.sp,
-                    fontFamily = kidsFont,
-                    fillColor = Color.White,
-                    strokeColor = Color(0xFFEC4899),
-                    strokeWidth = 6f
+                Image(
+                    painter = painterResource(id = R.drawable.grid_size_txt),
+                    contentDescription = "Grid Size",
+                    modifier = Modifier.height(24.dp)
                 )
             }
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp),
+                    .padding(top = 5.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -243,11 +240,11 @@ fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
 
                 OutlinedText(
                     text = "${gameRoundDimValues[selectedIndex]} x ${gameRoundDimValues[selectedIndex]}",
-                    fontSize = 40.sp,
+                    fontSize = 60.sp,
                     fontFamily = kidsFont,
                     fillColor = Color.White,
-                    strokeColor = Color(0xFF333333),
-                    strokeWidth = 10f
+                    strokeColor = Color(0xFFEC4899),
+                    strokeWidth = 5f
                 )
 
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f) {
@@ -305,13 +302,10 @@ fun GameModeSelector(
                     .padding(top = 20.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-                OutlinedText(
-                    text = "GAME MODE",
-                    fontSize = 20.sp,
-                    fontFamily = kidsFont,
-                    fillColor = Color.White,
-                    strokeColor = Color(0xFFEC4899),
-                    strokeWidth = 6f
+                Image(
+                    painter = painterResource(id = R.drawable.game_mode_txt),
+                    contentDescription = "Game Mode",
+                    modifier = Modifier.height(24.dp)
                 )
             }
 
@@ -331,7 +325,7 @@ fun GameModeSelector(
                     fontSize = 20.sp,
                     fontFamily = kidsFont,
                     fillColor = Color.White,
-                    strokeColor = Color(0xFF333333),
+                    strokeColor = Color(0xFFEC4899),
                     strokeWidth = 6f
                 )
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f, boxSize = 30.dp) {
@@ -357,7 +351,7 @@ fun GameModeSelector(
                     fontSize = 20.sp,
                     fontFamily = kidsFont,
                     fillColor = Color.White,
-                    strokeColor = Color(0xFF333333),
+                    strokeColor = Color(0xFFEC4899),
                     strokeWidth = 6f
                 )
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f, boxSize = 30.dp) {
@@ -405,8 +399,8 @@ fun OutlinedText(
     fontFamily: FontFamily,
     modifier: Modifier = Modifier,
     fillColor: Color = Color.White,
-    strokeColor: Color = Color.Black,
-    strokeWidth: Float = 8f
+    strokeColor: Color = Color(0xFFEC4899),
+    strokeWidth: Float = 10f
 ) {
     Box(modifier = modifier) {
         // Outer shadow/depth layer (darkest, largest)
@@ -416,9 +410,9 @@ fun OutlinedText(
                 fontSize = fontSize,
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A),
+                color = Color(0xFFEC4899),
                 drawStyle = Stroke(
-                    width = strokeWidth + 6f,
+                    width = strokeWidth + 7f,
                     join = StrokeJoin.Round,
                     cap = StrokeCap.Round
                 )
@@ -433,7 +427,7 @@ fun OutlinedText(
                 fontWeight = FontWeight.Bold,
                 color = strokeColor,
                 drawStyle = Stroke(
-                    width = strokeWidth + 2f,
+                    width = strokeWidth + 4f,
                     join = StrokeJoin.Round,
                     cap = StrokeCap.Round
                 )
