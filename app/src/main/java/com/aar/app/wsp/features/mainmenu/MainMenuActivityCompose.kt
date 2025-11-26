@@ -190,7 +190,7 @@ fun MainMenuScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     CircleMenuButton(icon = R.drawable.ic_history, onClick = onHistoryClicked)
-                    CircleMenuButton(icon = R.drawable.ic_settings_gold, onClick = onSettingClicked)
+                    CircleMenuButton(icon = R.drawable.ic_setting, onClick = onSettingClicked)
                 }
             }
         }
@@ -199,7 +199,7 @@ fun MainMenuScreen(
 
 @Composable
 fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
-    val kidsFont = FontFamily(Font(R.font.knewave_regular))
+    val kidsFont = FontFamily(Font(R.font.word_quest))
     val gameRoundDimValues = listOf(4, 5, 6,7,8,9)  // Must match MainMenuScreen
 
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -209,7 +209,10 @@ fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             contentScale = ContentScale.Crop
         )
-        Column {
+        Column(
+            modifier = Modifier
+                .padding(top = 10.dp)
+        ) {
 
             Row(
                 modifier = Modifier
@@ -230,7 +233,7 @@ fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 10.dp),
+                    .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -261,7 +264,7 @@ fun GameModeSelector(
     selectedDifficulty: Difficulty,
     onChange: (GameMode, Difficulty) -> Unit
 ) {
-    val kidsFont = FontFamily(Font(R.font.knewave_regular))
+    val kidsFont = FontFamily(Font(R.font.word_quest))
 
     // All available game modes and difficulties
     val gameModes = listOf(GameMode.Normal, GameMode.Hidden, GameMode.CountDown, GameMode.Marathon)
@@ -292,7 +295,10 @@ fun GameModeSelector(
             contentScale = ContentScale.Crop
         )
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier
+                .padding(top = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -365,65 +371,33 @@ fun GameModeSelector(
 }
 
 @Composable
-fun PlayButton(text: String = "PLAY", onClick: () -> Unit) {
-    val kidsFont = FontFamily(Font(R.font.knewave_regular))
-
-    Box(
+fun PlayButton(onClick: () -> Unit) {
+    // Use the play button image directly
+    Image(
+        painter = painterResource(id = R.drawable.play_btn),
+        contentDescription = "Play",
         modifier = Modifier
-            .width(260.dp)
-            .height(65.dp)
-            .clip(RoundedCornerShape(40.dp))
-            .background(Color(0xFFFEC84D))
-            .clickable{ onClick() }
-            .padding(5.dp),
-        contentAlignment = Alignment.Center
-    ) {
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(40.dp))
-                .background(Color(0xFFFF3EA5))
-        )
-        OutlinedText(
-            text = text,
-            fontSize = 32.sp,
-            fontFamily = kidsFont,
-            fillColor = Color.White,
-            strokeColor = Color(0xFF333333),
-            strokeWidth = 10f
-        )
-    }
+            .width(150.dp)
+            .height(58.dp)
+            .clip(RoundedCornerShape(49.dp))
+            .clickable { onClick() }
+    )
 }
 
 @Composable
-fun CircleMenuButton(icon: Int, size: Dp = 60.dp, onClick: () -> Unit) {
-    // Golden button style matching the design
-    Box(
+fun CircleMenuButton(icon: Int, size: Dp = 55.dp, onClick: () -> Unit) {
+    // Just display the button image directly (already has golden circle design)
+    Image(
+        painter = painterResource(id = icon),
+        contentDescription = null,
         modifier = Modifier
             .size(size)
             .clip(CircleShape)
-            .background(Color(0xFFD4A017)) // Darker gold border
-            .border(3.dp, Color(0xFFB8860B), CircleShape) // Dark golden border
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        // Inner golden circle
-        Box(
-            modifier = Modifier
-                .size(size - 8.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFFFD700)) // Bright gold
-        )
-        Image(
-            painter = painterResource(id = icon),
-            contentDescription = null,
-            modifier = Modifier.size(size * 0.5f)
-        )
-    }
+            .clickable { onClick() }
+    )
 }
 
-// Outlined text composable for text with black border
+// Bubble text composable for rounded, 3D bubble-like text effect
 @Composable
 fun OutlinedText(
     text: String,
@@ -435,7 +409,22 @@ fun OutlinedText(
     strokeWidth: Float = 8f
 ) {
     Box(modifier = modifier) {
-        // Stroke/outline layer
+        // Outer shadow/depth layer (darkest, largest)
+        Text(
+            text = text,
+            style = TextStyle(
+                fontSize = fontSize,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1A1A1A),
+                drawStyle = Stroke(
+                    width = strokeWidth + 6f,
+                    join = StrokeJoin.Round,
+                    cap = StrokeCap.Round
+                )
+            )
+        )
+        // Middle outline layer
         Text(
             text = text,
             style = TextStyle(
@@ -444,7 +433,22 @@ fun OutlinedText(
                 fontWeight = FontWeight.Bold,
                 color = strokeColor,
                 drawStyle = Stroke(
-                    width = strokeWidth,
+                    width = strokeWidth + 2f,
+                    join = StrokeJoin.Round,
+                    cap = StrokeCap.Round
+                )
+            )
+        )
+        // Inner highlight layer (gives 3D rounded look)
+        Text(
+            text = text,
+            style = TextStyle(
+                fontSize = fontSize,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.Bold,
+                color = fillColor,
+                drawStyle = Stroke(
+                    width = strokeWidth - 2f,
                     join = StrokeJoin.Round,
                     cap = StrokeCap.Round
                 )
