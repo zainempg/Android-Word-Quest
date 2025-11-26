@@ -244,7 +244,7 @@ fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
                     fontFamily = kidsFont,
                     fillColor = Color.White,
                     strokeColor = Color(0xFFEC4899),
-                    strokeWidth = 5f
+                    strokeWidth = 12f
                 )
 
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f) {
@@ -326,7 +326,7 @@ fun GameModeSelector(
                     fontFamily = kidsFont,
                     fillColor = Color.White,
                     strokeColor = Color(0xFFEC4899),
-                    strokeWidth = 6f
+                    strokeWidth = 10f
                 )
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f, boxSize = 30.dp) {
                     // Go to next mode (wrap around)
@@ -352,7 +352,7 @@ fun GameModeSelector(
                     fontFamily = kidsFont,
                     fillColor = Color.White,
                     strokeColor = Color(0xFFEC4899),
-                    strokeWidth = 6f
+                    strokeWidth = 10f
                 )
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f, boxSize = 30.dp) {
                     // Go to next difficulty (wrap around)
@@ -400,7 +400,8 @@ fun OutlinedText(
     modifier: Modifier = Modifier,
     fillColor: Color = Color.White,
     strokeColor: Color = Color(0xFFEC4899),
-    strokeWidth: Float = 14f
+    strokeWidth: Float = 14f,
+    letterSpacing: TextUnit = 3.sp
 ) {
     Box(modifier = modifier) {
         // Outer shadow/depth layer (darkest, largest)
@@ -410,6 +411,7 @@ fun OutlinedText(
                 fontSize = fontSize,
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.Bold,
+                letterSpacing = letterSpacing,
                 color = Color(0xFFEC4899),
                 drawStyle = Stroke(
                     width = strokeWidth + 10f,
@@ -425,6 +427,7 @@ fun OutlinedText(
                 fontSize = fontSize,
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.Bold,
+                letterSpacing = letterSpacing,
                 color = strokeColor,
                 drawStyle = Stroke(
                     width = strokeWidth + 6f,
@@ -440,6 +443,7 @@ fun OutlinedText(
                 fontSize = fontSize,
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.Bold,
+                letterSpacing = letterSpacing,
                 color = fillColor,
                 drawStyle = Stroke(
                     width = strokeWidth,
@@ -455,6 +459,7 @@ fun OutlinedText(
                 fontSize = fontSize,
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.Bold,
+                letterSpacing = letterSpacing,
                 color = fillColor
             )
         )
