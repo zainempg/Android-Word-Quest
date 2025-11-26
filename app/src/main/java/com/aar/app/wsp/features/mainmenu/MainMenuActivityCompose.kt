@@ -400,7 +400,7 @@ fun OutlinedText(
     modifier: Modifier = Modifier,
     fillColor: Color = Color.White,
     strokeColor: Color = Color(0xFFEC4899),
-    strokeWidth: Float = 10f
+    strokeWidth: Float = 14f
 ) {
     Box(modifier = modifier) {
         // Outer shadow/depth layer (darkest, largest)
@@ -412,7 +412,7 @@ fun OutlinedText(
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFFEC4899),
                 drawStyle = Stroke(
-                    width = strokeWidth + 7f,
+                    width = strokeWidth + 10f,
                     join = StrokeJoin.Round,
                     cap = StrokeCap.Round
                 )
@@ -427,7 +427,7 @@ fun OutlinedText(
                 fontWeight = FontWeight.Bold,
                 color = strokeColor,
                 drawStyle = Stroke(
-                    width = strokeWidth + 4f,
+                    width = strokeWidth + 6f,
                     join = StrokeJoin.Round,
                     cap = StrokeCap.Round
                 )
@@ -442,7 +442,7 @@ fun OutlinedText(
                 fontWeight = FontWeight.Bold,
                 color = fillColor,
                 drawStyle = Stroke(
-                    width = strokeWidth - 2f,
+                    width = strokeWidth,
                     join = StrokeJoin.Round,
                     cap = StrokeCap.Round
                 )

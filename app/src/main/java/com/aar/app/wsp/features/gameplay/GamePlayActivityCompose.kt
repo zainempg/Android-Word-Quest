@@ -495,9 +495,8 @@ fun WordPills(
     // Colors for word pills
     val pillColors = listOf(
         Color(0xFF4FC3F7), // Light blue
-        Color(0xFFFEE440), // Yellow
         Color(0xFF81D4FA), // Sky blue
-        Color(0xFFFFD54F), // Amber
+
     )
 
     // Use FlowRow-like layout with AndroidView for FlexboxLayout
