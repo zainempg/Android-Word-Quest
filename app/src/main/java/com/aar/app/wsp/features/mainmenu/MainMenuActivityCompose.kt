@@ -119,7 +119,7 @@ fun MainMenuScreen(
 ) {
 
     // State lifting
-    var selectedGridIndex by remember { mutableStateOf(1) } // default 4x4
+    var selectedGridIndex by remember { mutableStateOf(0) } // default 4x4
     var selectedGameMode by remember { mutableStateOf(GameMode.Normal) }
     var selectedDifficulty by remember { mutableStateOf(Difficulty.Easy) }
 

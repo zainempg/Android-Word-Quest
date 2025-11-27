@@ -118,6 +118,9 @@ class GamePlayActivityCompose : ComponentActivity() {
             val gameState by viewModel.onGameState.observeAsState()
             val timer by viewModel.onTimer.observeAsState(0)
             val answerResult by viewModel.onAnswerResult.observeAsState()
+            val countDown by viewModel.onCountDown.observeAsState(0)
+            val currentWord by viewModel.onCurrentWordChanged.observeAsState()
+            val currentWordCountDown by viewModel.onCurrentWordCountDown.observeAsState(0)
 
             // Handle answer result for sounds
             LaunchedEffect(answerResult) {
@@ -133,6 +136,9 @@ class GamePlayActivityCompose : ComponentActivity() {
             GamePlayScreen(
                 gameState = gameState,
                 timer = timer,
+                countDown = countDown,
+                currentWord = currentWord,
+                currentWordCountDown = currentWordCountDown,
                 preferences = preferences,
                 answerResult = answerResult,
                 onWordSelected = { word, answerLine, reverseMatching ->
@@ -183,6 +189,9 @@ class GamePlayActivityCompose : ComponentActivity() {
 fun GamePlayScreen(
     gameState: GamePlayViewModel.GameState?,
     timer: Int,
+    countDown: Int,
+    currentWord: UsedWord?,
+    currentWordCountDown: Int,
     preferences: Preferences?,
     answerResult: GamePlayViewModel.AnswerResult?,
     onWordSelected: (String, AnswerLine, Boolean) -> Unit,
@@ -216,6 +225,9 @@ fun GamePlayScreen(
                     GameContent(
                         gameData = gameData,
                         timer = timer,
+                        countDown = countDown,
+                        currentWord = currentWord,
+                        currentWordCountDown = currentWordCountDown,
                         kidsFont = kidsFont,
                         preferences = preferences,
                         answerResult = answerResult,
@@ -260,6 +272,9 @@ fun LoadingContent(text: String) {
 fun GameContent(
     gameData: GameData,
     timer: Int,
+    countDown: Int,
+    currentWord: UsedWord?,
+    currentWordCountDown: Int,
     kidsFont: FontFamily,
     preferences: Preferences?,
     answerResult: GamePlayViewModel.AnswerResult?,
@@ -286,7 +301,9 @@ fun GameContent(
     ) {
         // Header with timer and progress
         GameHeader(
+            gameData = gameData,
             timer = timer,
+            countDown = countDown,
             answeredCount = gameData.answeredWordsCount,
             totalWords = gameData.usedWords.size,
             kidsFont = kidsFont
@@ -302,6 +319,29 @@ fun GameContent(
         )
 
         Spacer(modifier = Modifier.weight(1f))
+
+        // Marathon mode - current word and countdown above the grid
+        if (gameData.gameMode == GameMode.Marathon && currentWord != null) {
+            MarathonWordProgress(
+                currentWord = currentWord,
+                currentWordCountDown = currentWordCountDown,
+                kidsFont = kidsFont
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        // CountDown mode - progress bar above the grid
+        if (gameData.gameMode == GameMode.CountDown && gameData.maxDuration > 0) {
+            CountDownProgressBar(
+                progress = countDown.toFloat() / gameData.maxDuration.toFloat(),
+                countDown = countDown,
+                kidsFont = kidsFont,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
         // Letter Board (using AndroidView to embed custom view)
         BoxWithConstraints(
@@ -431,58 +471,148 @@ fun GameContent(
 
 @Composable
 fun GameHeader(
+    gameData: GameData,
     timer: Int,
+    countDown: Int,
     answeredCount: Int,
     totalWords: Int,
     kidsFont: FontFamily
 ) {
     Spacer(Modifier.height(10.dp))
+    
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Main header row
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .clip(RoundedCornerShape(28.dp))
+                .background(Color(0xFFFEE440))
+                .padding(horizontal = 8.dp, vertical = 6.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Timer pill
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color(0xFFFF3EA5))
+                        .padding(horizontal = 20.dp, vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = DurationFormatter.fromInteger(timer),
+                        fontFamily = kidsFont,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = Color.White
+                    )
+                }
+
+                // Progress pill
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color(0xFFFF3EA5))
+                        .padding(horizontal = 20.dp, vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "$answeredCount/$totalWords",
+                        fontFamily = kidsFont,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+        
+    }
+}
+
+@Composable
+fun CountDownProgressBar(
+    progress: Float,
+    countDown: Int,
+    kidsFont: FontFamily,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xFFE0E0E0)) // Gray background
+    ) {
+        // Progress fill
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(progress.coerceIn(0f, 1f))
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0xFF4FC3F7)) // Sky blue
+        )
+        
+        // Countdown text on top
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = DurationFormatter.fromInteger(countDown),
+                fontFamily = kidsFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = Color(0xFF1976D2) // Dark blue text
+            )
+        }
+    }
+}
+
+@Composable
+fun MarathonWordProgress(
+    currentWord: UsedWord,
+    currentWordCountDown: Int,
+    kidsFont: FontFamily
+) {
+    val progress = if (currentWord.maxDuration > 0) {
+        currentWordCountDown.toFloat() / currentWord.maxDuration.toFloat()
+    } else 1f
+
+    // Yellow pill with word and progress bar inside
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
-            .clip(RoundedCornerShape(28.dp))
-            .background(Color(0xFFFEE440))
-            .padding(horizontal = 8.dp, vertical = 6.dp,)
+            .height(48.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xFFE0E0E0)) // Gray background (empty part)
     ) {
-        Row(
+        // Yellow progress that shrinks from right to left
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(progress.coerceIn(0f, 1f))
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0xFFFEC84D))
+        )
+        
+        // Word text on top
+        Box(
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            contentAlignment = Alignment.Center
         ) {
-            // Timer pill
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xFFFF3EA5))
-                    .padding(horizontal = 20.dp, vertical = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = DurationFormatter.fromInteger(timer),
-                    fontFamily = kidsFont,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    color = Color.White
-                )
-            }
-
-            // Progress pill
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xFFFF3EA5))
-                    .padding(horizontal = 20.dp, vertical = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "$answeredCount/$totalWords",
-                    fontFamily = kidsFont,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    color = Color.White
-                )
-            }
+            Text(
+                text = currentWord.string,
+                fontFamily = kidsFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                color = Color(0xFF8B5E3C) // Brown color
+            )
         }
     }
 }
@@ -619,11 +749,14 @@ fun GamePlayScreenPreview() {
         ) {
             val kidsFont = FontFamily.Default
 
-            GameHeader(
-                timer = 5,
-                answeredCount = 1,
-                totalWords = 7,
-                kidsFont = kidsFont
+            // Preview CountDown progress bar
+            CountDownProgressBar(
+                progress = 0.6f,
+                countDown = 45,
+                kidsFont = kidsFont,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
             )
         }
     }
