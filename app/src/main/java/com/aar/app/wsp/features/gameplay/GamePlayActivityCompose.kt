@@ -21,6 +21,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.animation.core.*
+import androidx.compose.animation.*
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -245,9 +248,10 @@ fun GamePlayScreen(
                 }
             }
             is GamePlayViewModel.Finished -> {
-                // Show completion then navigate
+                // Show completion then navigate - wait for flying animation to complete
                 LaunchedEffect(gameState) {
-                    kotlinx.coroutines.delay(1500)
+                    // Wait for flying animation (500ms) + pill bounce (480ms) + buffer
+                    kotlinx.coroutines.delay(2000)
                     onGameFinished(gameState.gameData?.id ?: 0, gameState.win)
                 }
                 GameFinishedOverlay(win = gameState.win, kidsFont = kidsFont)
@@ -291,6 +295,15 @@ fun GameContent(
     onWordSelected: (String, AnswerLine, Boolean) -> Unit
 ) {
     var letterBoardView by remember { mutableStateOf<LetterBoard?>(null) }
+    
+    // Flying text animation state
+    var flyingWord by remember { mutableStateOf<String?>(null) }
+    var showFlyingText by remember { mutableStateOf(false) }
+    val flyAnimationProgress = remember { Animatable(0f) }
+    var flyStartX by remember { mutableStateOf(0f) }
+    var flyStartY by remember { mutableStateOf(0f) }
+    var lastStreakEndX by remember { mutableStateOf(0f) }
+    var lastStreakEndY by remember { mutableStateOf(0f) }
 
     // Handle answer result - remove streak line if wrong
     LaunchedEffect(answerResult) {
@@ -298,11 +311,25 @@ fun GameContent(
             if (!result.correct) {
                 // Wrong answer - remove the last streak line
                 letterBoardView?.popStreakLine()
+            } else {
+                // Correct answer - trigger flying animation from streak line position
+                result.usedWord?.let { word ->
+                    flyingWord = word.string
+                    flyStartX = lastStreakEndX
+                    flyStartY = lastStreakEndY
+                    showFlyingText = true
+                    flyAnimationProgress.snapTo(0f)
+                    flyAnimationProgress.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(durationMillis = 800, easing = LinearOutSlowInEasing)
+                    )
+                    showFlyingText = false
+                }
             }
-            // If correct, the line stays (already added by the LetterBoard)
         }
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -329,11 +356,12 @@ fun GameContent(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Word pills
+        // Word pills with animation for answered words
         WordPills(
             words = gameData.usedWords,
             gameMode = gameData.gameMode,
-            kidsFont = kidsFont
+            kidsFont = kidsFont,
+            lastAnsweredWord = answerResult?.usedWord
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -446,6 +474,10 @@ fun GameContent(
                             }
 
                             override fun onSelectionEnd(streakLine: StreakView.StreakLine, str: String) {
+                                // Capture the center position of the streak line for flying animation
+                                lastStreakEndX = (streakLine.start.x + streakLine.end.x) / 2f
+                                lastStreakEndY = (streakLine.start.y + streakLine.end.y) / 2f
+                                
                                 val answerLine = AnswerLine(
                                     streakLine.startIndex.row,
                                     streakLine.startIndex.col,
@@ -471,6 +503,10 @@ fun GameContent(
                         }
 
                         override fun onSelectionEnd(streakLine: StreakView.StreakLine, str: String) {
+                            // Capture the center position of the streak line for flying animation
+                            lastStreakEndX = (streakLine.start.x + streakLine.end.x) / 2f
+                            lastStreakEndY = (streakLine.start.y + streakLine.end.y) / 2f
+                            
                             val answerLine = AnswerLine(
                                 streakLine.startIndex.row,
                                 streakLine.startIndex.col,
@@ -483,6 +519,50 @@ fun GameContent(
                 },
                 modifier = Modifier.fillMaxSize()
             )
+        }
+    }
+    
+        // Flying text overlay - flies slowly, gets bigger, then fades out
+        if (showFlyingText && flyingWord != null) {
+            val progress = flyAnimationProgress.value
+            
+            // Calculate position - start from grid area (bottom), fly to pills area (top)
+            val startYOffset = 180f  // Starting position offset (from grid area)
+            val endYOffset = -250f   // End position offset (toward pills area)
+            val currentYOffset = startYOffset + (endYOffset - startYOffset) * progress
+            
+            // Scale: start small, get BIGGER as it flies up (1.0 -> 2.0)
+            val scale = 1.0f + (1.2f * progress)
+            
+            // Alpha: start fully visible, fade out slowly in the last 40%
+            val alpha = if (progress > 0.6f) {
+                1f - ((progress - 0.6f) / 0.4f)
+            } else {
+                1f
+            }
+            
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = flyingWord!!,
+                    fontFamily = kidsFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 28.sp,
+                    color = Color(0xFFFEE440).copy(alpha = alpha),
+                    modifier = Modifier
+                        .offset(y = currentYOffset.dp)
+                        .scale(scale),
+                    style = TextStyle(
+                        shadow = Shadow(
+                            color = Color.Black.copy(alpha = alpha * 0.8f),
+                            blurRadius = 12f,
+                            offset = Offset(4f, 4f)
+                        )
+                    )
+                )
+            }
         }
     }
 }
@@ -706,13 +786,13 @@ fun ThemeNamePreview() {
 fun WordPills(
     words: List<UsedWord>,
     gameMode: GameMode,
-    kidsFont: FontFamily
+    kidsFont: FontFamily,
+    lastAnsweredWord: UsedWord? = null
 ) {
     // Colors for word pills
     val pillColors = listOf(
         Color(0xFF4FC3F7), // Light blue
         Color(0xFF81D4FA), // Sky blue
-
     )
 
     // Use FlowRow-like layout with AndroidView for FlexboxLayout
@@ -731,6 +811,8 @@ fun WordPills(
                 } else {
                     pillColors[index % pillColors.size]
                 }
+
+                val isJustAnswered = lastAnsweredWord?.id == word.id && word.isAnswered
 
                 val textView = android.widget.TextView(flexbox.context).apply {
                     text = if (gameMode == GameMode.Hidden && !word.isAnswered) {
@@ -760,6 +842,24 @@ fun WordPills(
                         setStroke(6, android.graphics.Color.parseColor("#FEC84D"))
                     }
                     background = drawable
+
+                    // Add bounce animation if just answered (bounce 2 times only, then stop)
+                    if (isJustAnswered) {
+                        val scaleAnimation = android.view.animation.ScaleAnimation(
+                            1.0f, 1.4f, 1.0f, 1.4f,
+                            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
+                            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f
+                        ).apply {
+                            duration = 150
+                            repeatCount = 3  // 2 full bounces = 4 half cycles (up-down-up-down)
+                            repeatMode = android.view.animation.Animation.REVERSE
+                            fillAfter = false  // Don't stay scaled after animation
+                            fillBefore = true
+                        }
+                        // Clear any existing animation first
+                        clearAnimation()
+                        startAnimation(scaleAnimation)
+                    }
                 }
 
                 val params = FlexboxLayout.LayoutParams(

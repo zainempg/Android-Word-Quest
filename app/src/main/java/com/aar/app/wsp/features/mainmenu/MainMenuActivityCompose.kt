@@ -127,7 +127,7 @@ fun MainMenuScreen(
     var selectedGameMode by remember { mutableStateOf(GameMode.Normal) }
     var selectedDifficulty by remember { mutableStateOf(Difficulty.Easy) }
 
-    val gameRoundDimValues = listOf(4, 5, 6,7,8,9)
+    val gameRoundDimValues = listOf(4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
     val gridSizeDimension = gameRoundDimValues[selectedGridIndex]
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -207,7 +207,7 @@ fun MainMenuScreen(
 @Composable
 fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
     val kidsFont = FontFamily(Font(R.font.word_quest))
-    val gameRoundDimValues = listOf(4, 5, 6,7,8,9)  // Must match MainMenuScreen
+    val gameRoundDimValues = listOf(4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)  // Must match MainMenuScreen
 
     Box(modifier = Modifier.fillMaxWidth()) {
         Image(
