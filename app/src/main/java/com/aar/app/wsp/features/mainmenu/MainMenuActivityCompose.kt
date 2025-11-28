@@ -65,17 +65,21 @@ class MainMenuActivityCompose : ComponentActivity() {
                 ThemeSelectorActivityCompose.EXTRA_THEME_ID,
                 GameTheme.NONE.id
             ) ?: GameTheme.NONE.id
+            val themeName = result.data?.getStringExtra(
+                ThemeSelectorActivityCompose.EXTRA_THEME_NAME
+            ) ?: "Theme"
 
             // Start the game with selected theme
-            startNewGame(themeId)
+            startNewGame(themeId, themeName)
         }
     }
 
-    private fun startNewGame(gameThemeId: Int) {
+    private fun startNewGame(gameThemeId: Int, themeName: String) {
         val intent = Intent(this, GamePlayActivityCompose::class.java).apply {
             putExtra(GamePlayActivityCompose.EXTRA_GAME_DIFFICULTY, pendingDifficulty)
             putExtra(GamePlayActivityCompose.EXTRA_GAME_MODE, pendingGameMode)
             putExtra(GamePlayActivityCompose.EXTRA_GAME_THEME_ID, gameThemeId)
+            putExtra(GamePlayActivityCompose.EXTRA_GAME_THEME_NAME, themeName)
             putExtra(GamePlayActivityCompose.EXTRA_ROW_COUNT, pendingGridSize)
             putExtra(GamePlayActivityCompose.EXTRA_COL_COUNT, pendingGridSize)
         }

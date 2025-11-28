@@ -95,8 +95,8 @@ class ThemeSelectorActivityCompose : ComponentActivity() {
                 isLoading = isLoading,
                 isUpdating = isUpdating,
                 revisionNumber = viewModel.lastDataRevision,
-                onAllThemesClick = { onThemeSelected(GameTheme.NONE.id) },
-                onThemeClick = { themeItem -> onThemeSelected(themeItem.id) },
+                onAllThemesClick = { onThemeSelected(GameTheme.NONE.id, "All Themes") },
+                onThemeClick = { themeItem -> onThemeSelected(themeItem.id, themeItem.name ?: "Theme") },
                 onUpdateClick = {
                     isUpdating = true
                     updateDisposable = viewModel.updateData()
@@ -117,12 +117,13 @@ class ThemeSelectorActivityCompose : ComponentActivity() {
         }
     }
 
-    private fun onThemeSelected(themeId: Int) {
+    private fun onThemeSelected(themeId: Int, themeName: String) {
         viewModel.checkWordAvailability(themeId, gridRowCount, gridColCount)
             .subscribe { available ->
                 if (available) {
                     val intent = Intent()
                     intent.putExtra(EXTRA_THEME_ID, themeId)
+                    intent.putExtra(EXTRA_THEME_NAME, themeName)
                     setResult(Activity.RESULT_OK, intent)
                     finish()
                 } else {
@@ -142,6 +143,7 @@ class ThemeSelectorActivityCompose : ComponentActivity() {
 
     companion object {
         const val EXTRA_THEME_ID = "game_theme_id"
+        const val EXTRA_THEME_NAME = "game_theme_name"
         const val EXTRA_ROW_COUNT = "row_count"
         const val EXTRA_COL_COUNT = "col_count"
     }
@@ -253,28 +255,39 @@ fun SelectWordThemeScreen(
 }
 @Composable
 fun TitleText(text: String) {
-    val kidsFont = FontFamily(Font(R.font.knewave_regular))
+    val kidsFont = FontFamily(Font(R.font.word_quest))
 
-    Text(
-        text = text,
-        fontSize = 32.sp,
-        fontWeight = FontWeight.ExtraBold,
-        fontFamily = kidsFont,
-        color = Color.White,
+    Box(
         modifier = Modifier.padding(8.dp),
-        style = TextStyle(
-            shadow = Shadow(
-                color = Color(0xFFDB0F7D),
-                blurRadius = 16f,
-                offset = Offset(0f, 4f)
+        contentAlignment = Alignment.Center
+    ) {
+        // Stroke text (behind)
+        Text(
+            text = text,
+            fontSize = 36.sp,
+            fontWeight = FontWeight.ExtraBold,
+            fontFamily = kidsFont,
+            color = Color(0xFFDB0F7D),
+            style = TextStyle(
+                drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = 12f
+                )
             )
         )
-    )
+        // Fill text (on top)
+        Text(
+            text = text,
+            fontSize = 36.sp,
+            fontWeight = FontWeight.ExtraBold,
+            fontFamily = kidsFont,
+            color = Color.White
+        )
+    }
 
 }
 @Composable
 fun AllThemesButton(onClick: () -> Unit = {}) {
-    val kidsFont = FontFamily(Font(R.font.knewave_regular))
+    val kidsFont = FontFamily(Font(R.font.word_quest))
 
     Box(
         modifier = Modifier
@@ -298,13 +311,25 @@ fun AllThemesButton(onClick: () -> Unit = {}) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = "All Themes",
-                    fontSize = 22.sp,
-                    color = Color.White,
-                    fontFamily = kidsFont,
-                    fontWeight = FontWeight.Bold
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "All Themes",
+                        fontSize = 24.sp,
+                        color = Color(0xFF5A3D8A),
+                        fontFamily = kidsFont,
+                        fontWeight = FontWeight.Bold,
+                        style = TextStyle(
+                            drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(width = 8f)
+                        )
+                    )
+                    Text(
+                        text = "All Themes",
+                        fontSize = 24.sp,
+                        color = Color.White,
+                        fontFamily = kidsFont,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
 
                 Spacer(modifier = Modifier.width(10.dp))
 
@@ -323,7 +348,7 @@ fun CategoryItem(
     bgColor: Color,
     onClick: () -> Unit = {}
 ) {
-    val kidsFont = FontFamily(Font(R.font.knewave_regular))
+    val kidsFont = FontFamily(Font(R.font.word_quest))
 
     Box(
         modifier = Modifier
@@ -350,13 +375,25 @@ fun CategoryItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(
-                        text = title,
-                        fontSize = 22.sp,
-                        fontFamily = kidsFont,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
+                    Box(contentAlignment = Alignment.CenterStart) {
+                        Text(
+                            text = title,
+                            fontSize = 24.sp,
+                            fontFamily = kidsFont,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            style = TextStyle(
+                                drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(width = 6f)
+                            )
+                        )
+                        Text(
+                            text = title,
+                            fontSize = 24.sp,
+                            fontFamily = kidsFont,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    }
                     Text(
                         text = subtitle,
                         fontSize = 14.sp,
@@ -378,7 +415,7 @@ fun UpdateWordsButton(
     isUpdating: Boolean = false,
     onClick: () -> Unit = {}
 ) {
-    val kidsFont = FontFamily(Font(R.font.knewave_regular))
+    val kidsFont = FontFamily(Font(R.font.word_quest))
 
     Box(
         modifier = Modifier
@@ -404,13 +441,25 @@ fun UpdateWordsButton(
                     strokeWidth = 3.dp
                 )
             } else {
-                Text(
-                    text = "Update Words",
-                    fontSize = 22.sp,
-                    fontFamily = kidsFont,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "Update Words",
+                        fontSize = 24.sp,
+                        fontFamily = kidsFont,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFAA2070),
+                        style = TextStyle(
+                            drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(width = 8f)
+                        )
+                    )
+                    Text(
+                        text = "Update Words",
+                        fontSize = 24.sp,
+                        fontFamily = kidsFont,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
             }
         }
     }

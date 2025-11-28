@@ -11,6 +11,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -95,6 +96,10 @@ class GamePlayActivityCompose : ComponentActivity() {
         intent.extras?.getInt(EXTRA_GAME_DATA_ID) ?: 0
     }
 
+    private val extraGameThemeName: String by lazy {
+        intent.extras?.getString(EXTRA_GAME_THEME_NAME) ?: "Theme"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (application as WordSearchApp).appComponent.inject(this)
@@ -141,6 +146,7 @@ class GamePlayActivityCompose : ComponentActivity() {
                 currentWordCountDown = currentWordCountDown,
                 preferences = preferences,
                 answerResult = answerResult,
+                themeName = extraGameThemeName,
                 onWordSelected = { word, answerLine, reverseMatching ->
                     viewModel.answerWord(word, answerLine, reverseMatching)
                 },
@@ -180,6 +186,7 @@ class GamePlayActivityCompose : ComponentActivity() {
         const val EXTRA_GAME_DATA_ID = "game_data_id"
         const val EXTRA_GAME_MODE = "game_mode"
         const val EXTRA_GAME_THEME_ID = "game_theme_id"
+        const val EXTRA_GAME_THEME_NAME = "game_theme_name"
         const val EXTRA_ROW_COUNT = "row_count"
         const val EXTRA_COL_COUNT = "col_count"
     }
@@ -194,6 +201,7 @@ fun GamePlayScreen(
     currentWordCountDown: Int,
     preferences: Preferences?,
     answerResult: GamePlayViewModel.AnswerResult?,
+    themeName: String,
     onWordSelected: (String, AnswerLine, Boolean) -> Unit,
     onGameFinished: (Int, Boolean) -> Unit
 ) {
@@ -231,6 +239,7 @@ fun GamePlayScreen(
                         kidsFont = kidsFont,
                         preferences = preferences,
                         answerResult = answerResult,
+                        themeName = themeName,
                         onWordSelected = onWordSelected
                     )
                 }
@@ -278,6 +287,7 @@ fun GameContent(
     kidsFont: FontFamily,
     preferences: Preferences?,
     answerResult: GamePlayViewModel.AnswerResult?,
+    themeName: String,
     onWordSelected: (String, AnswerLine, Boolean) -> Unit
 ) {
     var letterBoardView by remember { mutableStateOf<LetterBoard?>(null) }
@@ -310,6 +320,14 @@ fun GameContent(
         )
 
         Spacer(modifier = Modifier.height(12.dp))
+
+        // Theme name with yellow stroke text
+        ThemeNameBadge(
+            themeName = themeName,
+            kidsFont = kidsFont
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Word pills
         WordPills(
@@ -616,6 +634,73 @@ fun MarathonWordProgress(
         }
     }
 }
+
+@Composable
+fun ThemeNameBadge(
+    themeName: String,
+    kidsFont: FontFamily
+) {
+    // Use the same font as main menu
+    val wordQuestFont = FontFamily(Font(R.font.word_quest))
+    
+    Box(
+        modifier = Modifier.width(IntrinsicSize.Max),
+        contentAlignment = Alignment.Center
+    ) {
+        // Gradient line at bottom - behind the text, moved up to touch text
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .offset(y = (-4).dp)
+                .fillMaxWidth()
+                .height(20.dp)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black
+                        )
+                    )
+                )
+        )
+        
+        // Text with yellow stroke (on top of line)
+        Box(
+            contentAlignment = Alignment.Center
+        ) {
+            // Yellow stroke/outline text (drawn behind)
+            Text(
+                text = themeName.uppercase(),
+                fontFamily = wordQuestFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 32.sp,
+                color = Color(0xFFFEC84D), // Yellow color for stroke
+                style = TextStyle(
+                    drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(
+                        width = 5f
+                    )
+                )
+            )
+            // Main text (drawn on top)
+            Text(
+                text = themeName.uppercase(),
+                fontFamily = wordQuestFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 32.sp,
+                color = Color.White
+            )
+        }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun ThemeNamePreview() {
+    // Preview with mock data
+    ThemeNameBadge(themeName = "Theme Name", kidsFont = FontFamily.Default)
+}
+
+
+
 
 @Composable
 fun WordPills(

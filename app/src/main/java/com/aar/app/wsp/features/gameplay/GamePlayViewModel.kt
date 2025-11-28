@@ -144,16 +144,28 @@ class GamePlayViewModel @Inject constructor(
 
         val gameName = gameDataName
         setGameState(Generating(rowCount, colCount, gameName))
-        val maxChar = max(rowCount, colCount)
-        val flowableWords: Flowable<List<Word>>
-        flowableWords = if (gameThemeId == GameTheme.NONE.id) {
-            wordDataSource.getWords(maxChar)
+        
+        // Get words for this theme
+        // For grid size N, get words with length from (N-1) to (N-1) - only words that match the grid
+        // e.g., Grid 9 -> words of length 8 (9-1=8), max length < 9
+        val minWordLength = rowCount - 1  // Minimum word length = grid size - 1
+        val maxWordLength = rowCount      // Maximum word length < grid size
+        
+        val flowableWords: Flowable<List<Word>> = if (gameThemeId == GameTheme.NONE.id) {
+            wordDataSource.getWords(maxWordLength)
         } else {
-            wordDataSource.getWords(gameThemeId, maxChar)
+            wordDataSource.getWords(gameThemeId, maxWordLength)
         }
+        
         flowableWords.toObservable()
-            .flatMap { words: List<Word> ->
-                Flowable.fromIterable(words)
+            .flatMap { allWords: List<Word> ->
+                // Filter words: length must be >= (gridSize - 1) AND < gridSize
+                // For grid 9: words with length 8 only (>= 8 and < 9)
+                val filteredWords = allWords.filter { 
+                    it.string.length >= minWordLength && it.string.length < maxWordLength 
+                }
+                
+                Flowable.fromIterable(filteredWords)
                     .distinct(Word::string)
                     .map { word: Word ->
                         word.string = word.string.uppercase(Locale.getDefault())
