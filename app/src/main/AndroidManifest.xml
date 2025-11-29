@@ -17,6 +17,10 @@
             android:theme="@style/AppTheme">
         </activity>
         <activity
+            android:name="com.aar.app.wsp.features.settings.SettingsActivityCompose"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
             android:name="com.aar.app.wsp.features.gameplay.GamePlayActivity"
             android:screenOrientation="portrait">
         </activity>

@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.aar.app.wsp.R
 import com.aar.app.wsp.features.gamehistory.GameHistoryActivity
 import com.aar.app.wsp.features.gamethemeselector.ThemeSelectorActivityCompose
-import com.aar.app.wsp.features.settings.SettingsActivity
+import com.aar.app.wsp.features.settings.SettingsActivityCompose
 import com.aar.app.wsp.features.gameplay.GamePlayActivityCompose
 import com.aar.app.wsp.model.Difficulty
 import com.aar.app.wsp.model.GameMode
@@ -107,7 +107,7 @@ class MainMenuActivityCompose : ComponentActivity() {
                     themeSelectorLauncher.launch(intent)
                     overridePendingTransition(R.anim.slide_in, R.anim.slide_out)
                 },
-                onSettingClicked = { startActivity(Intent(this, SettingsActivity::class.java)) },
+                onSettingClicked = { startActivity(Intent(this, SettingsActivityCompose::class.java)) },
                 onHistoryClicked = { startActivity(Intent(this, GameHistoryActivity::class.java)) }
             )
         }
