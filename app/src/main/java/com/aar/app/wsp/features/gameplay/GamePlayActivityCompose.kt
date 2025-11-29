@@ -210,6 +210,17 @@ fun GamePlayScreen(
 ) {
     val kidsFont = FontFamily(Font(R.font.knewave_regular))
 
+    // Track if we should show the overlay (delayed for last word animation)
+    var showFinishedOverlay by remember { mutableStateOf(false) }
+    
+    // Remember the last playing game data to show during finish animation
+    var lastGameData by remember { mutableStateOf<GameData?>(null) }
+    
+    // Update last game data when in Playing state
+    if (gameState is GamePlayViewModel.Playing) {
+        lastGameData = gameState.gameData
+    }
+
     // Pink gradient background
     Box(
         modifier = Modifier
@@ -248,13 +259,38 @@ fun GamePlayScreen(
                 }
             }
             is GamePlayViewModel.Finished -> {
-                // Show completion then navigate - wait for flying animation to complete
+                // Keep showing game content during flying animation + pill bounce
+                // Then show overlay and finish
                 LaunchedEffect(gameState) {
-                    // Wait for flying animation (500ms) + pill bounce (480ms) + buffer
-                    kotlinx.coroutines.delay(2000)
+                    // Wait for flying animation (800ms) + pill bounce (600ms = 150ms * 4 cycles)
+                    kotlinx.coroutines.delay(1500)
+                    showFinishedOverlay = true
+                    // Wait a bit more for overlay to display before navigating
+                    kotlinx.coroutines.delay(1500)
                     onGameFinished(gameState.gameData?.id ?: 0, gameState.win)
                 }
-                GameFinishedOverlay(win = gameState.win, kidsFont = kidsFont)
+                
+                // Show the game content with the last word animation
+                val gameDataToShow = gameState.gameData ?: lastGameData
+                if (!showFinishedOverlay && gameDataToShow != null) {
+                    GameContent(
+                        gameData = gameDataToShow,
+                        timer = timer,
+                        countDown = countDown,
+                        currentWord = currentWord,
+                        currentWordCountDown = currentWordCountDown,
+                        kidsFont = kidsFont,
+                        preferences = preferences,
+                        answerResult = answerResult,
+                        themeName = themeName,
+                        onWordSelected = { _, _, _ -> } // Disable selection during finish
+                    )
+                }
+                
+                // Show overlay after animation completes
+                if (showFinishedOverlay) {
+                    GameFinishedOverlay(win = gameState.win, kidsFont = kidsFont)
+                }
             }
             else -> {
                 LoadingContent("Starting...")
@@ -795,6 +831,12 @@ fun WordPills(
         Color(0xFF81D4FA), // Sky blue
     )
 
+    // Track which words have already been animated to prevent re-animation on recomposition
+    val animatedWordIds = remember { mutableSetOf<Int>() }
+    
+    // Capture the last answered word ID to trigger animation only once
+    val lastAnsweredId = lastAnsweredWord?.id
+
     // Use FlowRow-like layout with AndroidView for FlexboxLayout
     AndroidView(
         factory = { context ->
@@ -812,7 +854,10 @@ fun WordPills(
                     pillColors[index % pillColors.size]
                 }
 
-                val isJustAnswered = lastAnsweredWord?.id == word.id && word.isAnswered
+                // Only animate if this word was just answered AND hasn't been animated yet
+                val shouldAnimate = lastAnsweredId == word.id && 
+                                    word.isAnswered && 
+                                    !animatedWordIds.contains(word.id)
 
                 val textView = android.widget.TextView(flexbox.context).apply {
                     text = if (gameMode == GameMode.Hidden && !word.isAnswered) {
@@ -844,7 +889,10 @@ fun WordPills(
                     background = drawable
 
                     // Add bounce animation if just answered (bounce 2 times only, then stop)
-                    if (isJustAnswered) {
+                    if (shouldAnimate) {
+                        // Mark this word as animated so it won't animate again
+                        animatedWordIds.add(word.id)
+                        
                         val scaleAnimation = android.view.animation.ScaleAnimation(
                             1.0f, 1.4f, 1.0f, 1.4f,
                             android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
