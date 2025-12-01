@@ -284,6 +284,14 @@ fun SettingsScreen(
                 onClick = {}
             )
 
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // App Description, Sound Effects & Developer Credit - Combined Card
+            AboutInfoCard(
+                text = "Word search puzzle game with dynamically generated levels.\n\nSound effects:\n• correct (freesound.org/s/131660/) & wrong (freesound.org/s/131657/) by Bertrof\n• winning (freesound.org/s/258142/) by Tuudurt\n• lose (freesound.org/s/270329/) by LittleRobotSoundFactory\n\nDeveloper: Developers Era",
+                kidsFont = kidsFont
+            )
+
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
@@ -595,6 +603,31 @@ fun SectionHeader(title: String, kidsFont: FontFamily) {
                     blurRadius = 0f
                 )
             )
+        )
+    }
+}
+
+@Composable
+fun AboutInfoCard(
+    text: String,
+    kidsFont: FontFamily
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color(0xFFFFE4EC))
+            .border(4.dp, Color(0xFFFEC84D), RoundedCornerShape(24.dp))
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Text(
+            text = text,
+            fontFamily = kidsFont,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF333333),
+            lineHeight = 22.sp
         )
     }
 }
@@ -975,6 +1008,14 @@ fun SettingsScreenPreviewContent() {
                 subtitle = "1.0",
                 kidsFont = kidsFont,
                 onClick = {}
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // App Description, Sound Effects & Developer Credit - Combined Card
+            AboutInfoCard(
+                text = "Word search puzzle game with dynamically generated levels.\n\nSound effects:\n• correct (freesound.org/s/131660/) & wrong (freesound.org/s/131657/) by Bertrof\n• winning (freesound.org/s/258142/) by Tuudurt\n• lose (freesound.org/s/270329/) by LittleRobotSoundFactory\n\nDeveloper: Developers Era",
+                kidsFont = kidsFont
             )
 
             Spacer(modifier = Modifier.height(32.dp))

@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aar.app.wsp.R
-import com.aar.app.wsp.features.gamehistory.GameHistoryActivity
+import com.aar.app.wsp.features.gamehistory.GameHistoryActivityCompose
 import com.aar.app.wsp.features.gamethemeselector.ThemeSelectorActivityCompose
 import com.aar.app.wsp.features.settings.SettingsActivityCompose
 import com.aar.app.wsp.features.gameplay.GamePlayActivityCompose
@@ -108,7 +108,7 @@ class MainMenuActivityCompose : ComponentActivity() {
                     overridePendingTransition(R.anim.slide_in, R.anim.slide_out)
                 },
                 onSettingClicked = { startActivity(Intent(this, SettingsActivityCompose::class.java)) },
-                onHistoryClicked = { startActivity(Intent(this, GameHistoryActivity::class.java)) }
+                onHistoryClicked = { startActivity(Intent(this, GameHistoryActivityCompose::class.java)) }
             )
         }
     }

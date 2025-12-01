@@ -99,8 +99,8 @@ class GamePlayActivityCompose : ComponentActivity() {
         intent.extras?.getInt(EXTRA_GAME_DATA_ID) ?: 0
     }
 
-    private val extraGameThemeName: String by lazy {
-        intent.extras?.getString(EXTRA_GAME_THEME_NAME) ?: "Theme"
+    private val extraGameThemeName: String? by lazy {
+        intent.getStringExtra(EXTRA_GAME_THEME_NAME)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,7 +118,8 @@ class GamePlayActivityCompose : ComponentActivity() {
                 colCount = extraColumnCount,
                 gameThemeId = extraGameThemeId,
                 gameMode = extraGameMode,
-                difficulty = extraDifficulty
+                difficulty = extraDifficulty,
+                themeName = extraGameThemeName
             )
         }
 
@@ -141,6 +142,11 @@ class GamePlayActivityCompose : ComponentActivity() {
                 }
             }
 
+            // Determine theme name: use provided name, or game name from data if loading from history
+            val displayThemeName = extraGameThemeName 
+                ?: (gameState as? GamePlayViewModel.Playing)?.gameData?.name 
+                ?: "Puzzle"
+
             GamePlayScreen(
                 gameState = gameState,
                 timer = timer,
@@ -149,7 +155,7 @@ class GamePlayActivityCompose : ComponentActivity() {
                 currentWordCountDown = currentWordCountDown,
                 preferences = preferences,
                 answerResult = answerResult,
-                themeName = extraGameThemeName,
+                themeName = displayThemeName,
                 onWordSelected = { word, answerLine, reverseMatching ->
                     viewModel.answerWord(word, answerLine, reverseMatching)
                 },

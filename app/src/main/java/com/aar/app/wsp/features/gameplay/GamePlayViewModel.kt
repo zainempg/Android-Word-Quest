@@ -138,11 +138,13 @@ class GamePlayViewModel @Inject constructor(
         colCount: Int,
         gameThemeId: Int,
         gameMode: GameMode,
-        difficulty: Difficulty
+        difficulty: Difficulty,
+        themeName: String? = null
     ) {
         if (currentState is Generating) return
 
-        val gameName = gameDataName
+        // Use theme name if provided and not empty, otherwise use default "Puzzle - X" format
+        val gameName = if (!themeName.isNullOrEmpty()) themeName else gameDataName
         setGameState(Generating(rowCount, colCount, gameName))
         
         // Get words for this theme

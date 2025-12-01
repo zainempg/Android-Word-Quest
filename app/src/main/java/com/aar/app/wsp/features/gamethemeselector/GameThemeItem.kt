@@ -7,7 +7,7 @@ class GameThemeItem {
     var id = 0
 
     @ColumnInfo(name = "name")
-    var name: String? = null
+    var name: String = ""
 
     @ColumnInfo(name = "words_count")
     var wordsCount = 0

@@ -96,7 +96,7 @@ class ThemeSelectorActivityCompose : ComponentActivity() {
                 isUpdating = isUpdating,
                 revisionNumber = viewModel.lastDataRevision,
                 onAllThemesClick = { onThemeSelected(GameTheme.NONE.id, "All Themes") },
-                onThemeClick = { themeItem -> onThemeSelected(themeItem.id, themeItem.name ?: "Theme") },
+                onThemeClick = { themeItem -> onThemeSelected(themeItem.id, themeItem.name.ifEmpty { "Theme" }) },
                 onUpdateClick = {
                     isUpdating = true
                     updateDisposable = viewModel.updateData()
@@ -214,7 +214,7 @@ fun SelectWordThemeScreen(
                     items(themes) { theme ->
                         val colorIndex = (theme.id - 1) % themeColors.size
                         CategoryItem(
-                            title = theme.name ?: "",
+                            title = theme.name,
                             subtitle = "${theme.wordsCount} words",
                             bgColor = themeColors[colorIndex],
                             onClick = { onThemeClick(theme) }
