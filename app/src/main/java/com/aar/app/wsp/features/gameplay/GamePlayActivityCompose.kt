@@ -394,7 +394,8 @@ fun GameContent(
             words = gameData.usedWords,
             gameMode = gameData.gameMode,
             kidsFont = kidsFont,
-            lastAnsweredWord = answerResult?.usedWord
+            lastAnsweredWord = answerResult?.usedWord,
+            grayscale = preferences?.grayscale() == true
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -446,21 +447,36 @@ fun GameContent(
             // Default cell size is 50px, calculate scale to fit available space
             val defaultCellSize = 50
             val defaultGridSize = defaultCellSize * maxDim
-            val scaleFactor = gridSizePx.toFloat() / defaultGridSize.toFloat()
+            
+            // Auto scale grid: if enabled, always scale to fit; if disabled, only scale when grid is too big
+            val autoScale = preferences?.autoScaleGrid() != false
+            val needsScaling = autoScale || defaultGridSize > gridSizePx
+            val scaleFactor = if (needsScaling) {
+                gridSizePx.toFloat() / defaultGridSize.toFloat()
+            } else {
+                1f // No scaling - use original size
+            }
 
-            // Streak line colors with transparency (alpha ~50%) so overlapping lines are visible
-            val streakColors = intArrayOf(
-                android.graphics.Color.parseColor("#80FF3EA5"), // Pink
-                android.graphics.Color.parseColor("#804FC3F7"), // Light blue
-                android.graphics.Color.parseColor("#8066BB6A"), // Green
-                android.graphics.Color.parseColor("#80FFA726"), // Orange
-                android.graphics.Color.parseColor("#80AB47BC"), // Purple
-                android.graphics.Color.parseColor("#80EF5350"), // Red
-                android.graphics.Color.parseColor("#8026C6DA"), // Cyan
-                android.graphics.Color.parseColor("#80FFEE58"), // Yellow
-                android.graphics.Color.parseColor("#808D6E63"), // Brown
-                android.graphics.Color.parseColor("#805C6BC0"), // Indigo
-            )
+            // Streak line colors - gray when grayscale is enabled, colorful otherwise
+            val isGrayscale = preferences?.grayscale() == true
+            val grayColor = android.graphics.Color.parseColor("#aa808080")
+            
+            val streakColors = if (isGrayscale) {
+                intArrayOf(grayColor) // Single gray color for all
+            } else {
+                intArrayOf(
+                    android.graphics.Color.parseColor("#80FF3EA5"), // Pink
+                    android.graphics.Color.parseColor("#804FC3F7"), // Light blue
+                    android.graphics.Color.parseColor("#8066BB6A"), // Green
+                    android.graphics.Color.parseColor("#80FFA726"), // Orange
+                    android.graphics.Color.parseColor("#80AB47BC"), // Purple
+                    android.graphics.Color.parseColor("#80EF5350"), // Red
+                    android.graphics.Color.parseColor("#8026C6DA"), // Cyan
+                    android.graphics.Color.parseColor("#80FFEE58"), // Yellow
+                    android.graphics.Color.parseColor("#808D6E63"), // Brown
+                    android.graphics.Color.parseColor("#805C6BC0"), // Indigo
+                )
+            }
 
             // Track the current color index based on answered words
             val answeredCount = gameData.usedWords.count { it.isAnswered }
@@ -824,13 +840,22 @@ fun WordPills(
     words: List<UsedWord>,
     gameMode: GameMode,
     kidsFont: FontFamily,
-    lastAnsweredWord: UsedWord? = null
+    lastAnsweredWord: UsedWord? = null,
+    grayscale: Boolean = false
 ) {
-    // Colors for word pills
-    val pillColors = listOf(
-        Color(0xFF4FC3F7), // Light blue
-        Color(0xFF81D4FA), // Sky blue
-    )
+    // Colors for word pills - gray when grayscale is enabled
+    val grayColor = Color(0xFF808080)
+    val pillColors = if (grayscale) {
+        listOf(grayColor, grayColor)
+    } else {
+        listOf(
+            Color(0xFF4FC3F7), // Light blue
+            Color(0xFF81D4FA), // Sky blue
+        )
+    }
+    
+    // Answered pill color - gray when grayscale, yellow otherwise
+    val answeredColor = if (grayscale) grayColor else Color(0xFFFEE440)
 
     // Track which words have already been animated to prevent re-animation on recomposition
     val animatedWordIds = remember { mutableSetOf<Int>() }
@@ -850,7 +875,7 @@ fun WordPills(
             flexbox.removeAllViews()
             words.forEachIndexed { index, word ->
                 val pillColor = if (word.isAnswered) {
-                    Color(0xFFFEE440) // Yellow for answered
+                    answeredColor // Yellow for answered (or gray if grayscale)
                 } else {
                     pillColors[index % pillColors.size]
                 }

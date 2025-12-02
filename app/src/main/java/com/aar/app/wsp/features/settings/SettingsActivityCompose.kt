@@ -181,6 +181,7 @@ fun SettingsScreen(
             SettingsToggleRow(
                 icon = R.drawable.ic_reverse_match,
                 title = "Reverse matching",
+                description = "Find words in both directions (CAT or TAC)",
                 isChecked = reverseMatching,
                 kidsFont = kidsFont,
                 onCheckedChange = { checked ->
@@ -195,6 +196,7 @@ fun SettingsScreen(
             SettingsOnOffRow(
                 icon = R.drawable.ic_delete_after_finish,
                 title = "Delete Finish",
+                description = "Remove game from history after finishing",
                 isOn = deleteAfterFinish,
                 kidsFont = kidsFont,
                 onToggle = { isOn ->
@@ -209,6 +211,7 @@ fun SettingsScreen(
             SettingsOnOffRow(
                 icon = R.drawable.ic_auto_scale,
                 title = "Auto Scale Grid",
+                description = "Automatically resize grid to fit screen",
                 isOn = autoScaleGrid,
                 kidsFont = kidsFont,
                 onToggle = { isOn ->
@@ -223,6 +226,7 @@ fun SettingsScreen(
             SettingsOnOffRow(
                 icon = R.drawable.ic_grayscale,
                 title = "Grayscale",
+                description = "Use gray colors instead of colorful highlights",
                 isOn = grayscale,
                 kidsFont = kidsFont,
                 onToggle = { isOn ->
@@ -237,6 +241,7 @@ fun SettingsScreen(
             SettingsOnOffRow(
                 icon = R.drawable.ic_grid,
                 title = "Show Grid Line",
+                description = "Display grid lines on the letter board",
                 isOn = showGridLine,
                 kidsFont = kidsFont,
                 onToggle = { isOn ->
@@ -251,6 +256,7 @@ fun SettingsScreen(
             SettingsOnOffRow(
                 icon = R.drawable.ic_snap_grid,
                 title = "Snap To Grid",
+                description = "Snap selection to grid cells automatically",
                 isOn = snapToGrid,
                 kidsFont = kidsFont,
                 onToggle = { isOn ->
@@ -353,70 +359,83 @@ fun SettingsTitle(text: String, kidsFont: FontFamily) {
 fun SettingsToggleRow(
     icon: Int,
     title: String,
+    description: String = "",
     isChecked: Boolean,
     kidsFont: FontFamily,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp)
-            .clip(RoundedCornerShape(30.dp))
-            .background(Color(0xFF7DD3F4))
-            .border(4.dp, Color(0xFFFEC84D), RoundedCornerShape(30.dp))
-            .clickable { onCheckedChange(!isChecked) }
-            .padding(horizontal = 16.dp),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+    Column {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+                .clip(RoundedCornerShape(30.dp))
+                .background(Color(0xFF7DD3F4))
+                .border(4.dp, Color(0xFFFEC84D), RoundedCornerShape(30.dp))
+                .clickable { onCheckedChange(!isChecked) }
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.CenterStart
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                // Icon in circular background
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFFF6B9D)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = icon),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        colorFilter = ColorFilter.tint(Color.White)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Icon in circular background
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFFF6B9D)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            colorFilter = ColorFilter.tint(Color.White)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Text(
+                        text = title,
+                        fontFamily = kidsFont,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF333333)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Text(
-                    text = title,
-                    fontFamily = kidsFont,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF333333)
+                // Custom Toggle Switch
+                CustomToggleSwitch(
+                    isChecked = isChecked,
+                    onCheckedChange = onCheckedChange
                 )
             }
 
-            // Custom Toggle Switch
-            CustomToggleSwitch(
-                isChecked = isChecked,
-                onCheckedChange = onCheckedChange
+            // Highlight shine effect
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .offset(x = 20.dp, y = 8.dp)
+                    .size(width = 60.dp, height = 8.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Color.White.copy(alpha = 0.5f))
             )
         }
-
-        // Highlight shine effect
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .offset(x = 20.dp, y = 8.dp)
-                .size(width = 60.dp, height = 8.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(Color.White.copy(alpha = 0.5f))
-        )
+        
+        // Description text
+        if (description.isNotEmpty()) {
+            Text(
+                text = description,
+                fontSize = 12.sp,
+                color = Color.White.copy(alpha = 0.9f),
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
     }
 }
 
@@ -454,67 +473,80 @@ fun CustomToggleSwitch(
 fun SettingsOnOffRow(
     icon: Int,
     title: String,
+    description: String = "",
     isOn: Boolean,
     kidsFont: FontFamily,
     onToggle: (Boolean) -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp)
-            .clip(RoundedCornerShape(30.dp))
-            .background(Color(0xFF7DD3F4))
-            .border(4.dp, Color(0xFFFEC84D), RoundedCornerShape(30.dp))
-            .clickable { onToggle(!isOn) }
-            .padding(horizontal = 16.dp),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+    Column {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+                .clip(RoundedCornerShape(30.dp))
+                .background(Color(0xFF7DD3F4))
+                .border(4.dp, Color(0xFFFEC84D), RoundedCornerShape(30.dp))
+                .clickable { onToggle(!isOn) }
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.CenterStart
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                // Icon in circular background
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF26C6B0)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = icon),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        colorFilter = ColorFilter.tint(Color.White)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Icon in circular background
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF26C6B0)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            colorFilter = ColorFilter.tint(Color.White)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Text(
+                        text = title,
+                        fontFamily = kidsFont,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF333333)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Text(
-                    text = title,
-                    fontFamily = kidsFont,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF333333)
-                )
+                // ON/OFF pill button
+                OnOffButton(isOn = isOn, onClick = { onToggle(!isOn) })
             }
 
-            // ON/OFF pill button
-            OnOffButton(isOn = isOn, onClick = { onToggle(!isOn) })
+            // Highlight shine effect
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .offset(x = 20.dp, y = 8.dp)
+                    .size(width = 60.dp, height = 8.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Color.White.copy(alpha = 0.5f))
+            )
         }
-
-        // Highlight shine effect
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .offset(x = 20.dp, y = 8.dp)
-                .size(width = 60.dp, height = 8.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(Color.White.copy(alpha = 0.5f))
-        )
+        
+        // Description text
+        if (description.isNotEmpty()) {
+            Text(
+                text = description,
+                fontSize = 12.sp,
+                color = Color.White.copy(alpha = 0.9f),
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
     }
 }
 
