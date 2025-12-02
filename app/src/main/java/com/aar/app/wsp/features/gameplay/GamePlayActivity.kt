@@ -115,10 +115,11 @@ class GamePlayActivity : FullscreenActivity() {
             }
         }
 
-        if (!preferences.showGridLine()) {
-             binding.partialGameContent.letterBoard.gridLineBackground.visibility = View.INVISIBLE
+        // Show/hide grid lines based on preference
+        if (preferences.showGridLine()) {
+            binding.partialGameContent.letterBoard.gridLineBackground.visibility = View.VISIBLE
         } else {
-             binding.partialGameContent.letterBoard.gridLineBackground.visible()
+            binding.partialGameContent.letterBoard.gridLineBackground.visibility = View.INVISIBLE
         }
          binding.partialGameContent.letterBoard.streakView.isSnapToGrid = preferences.snapToGrid
         binding.layout1.textGameFinished.gone()

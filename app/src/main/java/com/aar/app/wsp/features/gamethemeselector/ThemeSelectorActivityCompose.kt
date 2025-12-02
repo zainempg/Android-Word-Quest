@@ -206,7 +206,14 @@ fun SelectWordThemeScreen(
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     item {
-                        TitleText("SELECT WORD THEME")
+                        Image(
+                            painter = painterResource(id = R.drawable.select_word_theme),
+                            contentDescription = "Select Word Theme",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 40.dp, vertical = 8.dp),
+                            contentScale = ContentScale.FillWidth
+                        )
                     }
                     item {
                         AllThemesButton(onClick = onAllThemesClick)

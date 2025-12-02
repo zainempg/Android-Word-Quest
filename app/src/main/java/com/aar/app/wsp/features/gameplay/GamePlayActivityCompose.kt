@@ -475,8 +475,12 @@ fun GameContent(
                             dataAdapter = ArrayLetterGridDataAdapter(grid.array)
                         }
 
-                        // Configure appearance - show grid lines
-                        gridLineBackground.visibility = android.view.View.VISIBLE
+                        // Configure appearance - show/hide grid lines based on preference
+                        gridLineBackground.visibility = if (preferences?.showGridLine() == true) {
+                            android.view.View.VISIBLE
+                        } else {
+                            android.view.View.INVISIBLE
+                        }
                         streakView.isSnapToGrid = preferences?.snapToGrid ?: StreakView.SnapType.ALWAYS_SNAP
 
                         // Scale the board to fit available space using proper scale method
