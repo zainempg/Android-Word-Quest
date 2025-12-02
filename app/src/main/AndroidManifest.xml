@@ -41,6 +41,10 @@
             android:screenOrientation="portrait">
         </activity>
         <activity
+            android:name="com.aar.app.wsp.features.gameover.GameOverActivityCompose"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
             android:name="com.aar.app.wsp.features.SplashScreenActivity"
             android:exported="true"
             android:screenOrientation="portrait"

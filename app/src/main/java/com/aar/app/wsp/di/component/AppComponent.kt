@@ -7,6 +7,7 @@ import com.aar.app.wsp.features.FullscreenActivity
 import com.aar.app.wsp.features.gamehistory.GameHistoryActivity
 import com.aar.app.wsp.features.gamehistory.GameHistoryActivityCompose
 import com.aar.app.wsp.features.gameover.GameOverActivity
+import com.aar.app.wsp.features.gameover.GameOverActivityCompose
 import com.aar.app.wsp.features.gameplay.GamePlayActivity
 import com.aar.app.wsp.features.gameplay.GamePlayActivityCompose
 import com.aar.app.wsp.features.gamethemeselector.ThemeSelectorActivity
@@ -25,6 +26,7 @@ interface AppComponent {
     fun inject(activity: GamePlayActivityCompose)
     fun inject(activity: MainMenuActivity)
     fun inject(activity: GameOverActivity)
+    fun inject(activity: GameOverActivityCompose)
     fun inject(activity: FullscreenActivity)
     fun inject(activity: GameHistoryActivity)
     fun inject(activity: GameHistoryActivityCompose)

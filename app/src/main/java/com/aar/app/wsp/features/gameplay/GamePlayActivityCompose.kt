@@ -50,7 +50,7 @@ import com.aar.app.wsp.commons.Util
 import com.aar.app.wsp.custom.LetterBoard
 import com.aar.app.wsp.custom.StreakView
 import com.aar.app.wsp.features.SoundPlayer
-import com.aar.app.wsp.features.gameover.GameOverActivity
+import com.aar.app.wsp.features.gameover.GameOverActivityCompose
 import com.aar.app.wsp.features.settings.Preferences
 import com.aar.app.wsp.model.Difficulty
 import com.aar.app.wsp.model.GameData
@@ -166,8 +166,8 @@ class GamePlayActivityCompose : ComponentActivity() {
                         soundPlayer.play(SoundPlayer.Sound.Lose)
                     }
                     // Navigate to game over
-                    val intent = Intent(this, GameOverActivity::class.java)
-                    intent.putExtra(GameOverActivity.EXTRA_GAME_ROUND_ID, gameDataId)
+                    val intent = Intent(this, GameOverActivityCompose::class.java)
+                    intent.putExtra(GameOverActivityCompose.EXTRA_GAME_ROUND_ID, gameDataId)
                     startActivity(intent)
                     finish()
                 }
@@ -265,20 +265,16 @@ fun GamePlayScreen(
                 }
             }
             is GamePlayViewModel.Finished -> {
-                // Keep showing game content during flying animation + pill bounce
-                // Then show overlay and finish
+                // Go directly to Game Over screen with short delay for last word animation
                 LaunchedEffect(gameState) {
-                    // Wait for flying animation (800ms) + pill bounce (600ms = 150ms * 4 cycles)
-                    kotlinx.coroutines.delay(1500)
-                    showFinishedOverlay = true
-                    // Wait a bit more for overlay to display before navigating
-                    kotlinx.coroutines.delay(1500)
+                    // Brief delay for last word animation
+                    kotlinx.coroutines.delay(800)
                     onGameFinished(gameState.gameData?.id ?: 0, gameState.win)
                 }
                 
-                // Show the game content with the last word animation
+                // Show the game content during the brief transition
                 val gameDataToShow = gameState.gameData ?: lastGameData
-                if (!showFinishedOverlay && gameDataToShow != null) {
+                if (gameDataToShow != null) {
                     GameContent(
                         gameData = gameDataToShow,
                         timer = timer,
@@ -291,11 +287,6 @@ fun GamePlayScreen(
                         themeName = themeName,
                         onWordSelected = { _, _, _ -> } // Disable selection during finish
                     )
-                }
-                
-                // Show overlay after animation completes
-                if (showFinishedOverlay) {
-                    GameFinishedOverlay(win = gameState.win, kidsFont = kidsFont)
                 }
             }
             else -> {
