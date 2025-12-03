@@ -526,12 +526,26 @@ fun StatsCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                StatItem(
-                    emoji = "🔲",
-                    label = "Grid",
-                    value = gridSize,
-                    font = font
-                )
+                // Grid stat with custom icon
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    GridIcon()
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = gridSize,
+                        fontFamily = font,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Grid",
+                        fontFamily = font,
+                        fontSize = 14.sp,
+                        color = Color.White.copy(alpha = 0.7f)
+                    )
+                }
                 StatItem(
                     emoji = "📝",
                     label = "Words",
@@ -544,6 +558,34 @@ fun StatsCard(
                     value = duration,
                     font = font
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun GridIcon() {
+    // Custom 3x3 grid icon
+    Box(
+        modifier = Modifier.size(32.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            repeat(3) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
+                    repeat(3) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(Color(0xFFFFD700))
+                        )
+                    }
+                }
             }
         }
     }
