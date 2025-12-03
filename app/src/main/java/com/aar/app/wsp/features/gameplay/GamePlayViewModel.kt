@@ -148,10 +148,10 @@ class GamePlayViewModel @Inject constructor(
         setGameState(Generating(rowCount, colCount, gameName))
         
         // Get words for this theme
-        // For grid size N, get words with length from (N-1) to (N-1) - only words that match the grid
-        // e.g., Grid 9 -> words of length 8 (9-1=8), max length < 9
-        val minWordLength = rowCount - 1  // Minimum word length = grid size - 1
-        val maxWordLength = rowCount      // Maximum word length < grid size
+        // For grid size N, get words with length from 3 to (N-1)
+        // e.g., Grid 5 -> words of length 3 and 4, Grid 6 -> words of length 3, 4, and 5
+        val minWordLength = 3  // Minimum word length is always 3
+        val maxWordLength = rowCount  // Maximum word length < grid size
         
         val flowableWords: Flowable<List<Word>> = if (gameThemeId == GameTheme.NONE.id) {
             wordDataSource.getWords(maxWordLength)
@@ -161,8 +161,8 @@ class GamePlayViewModel @Inject constructor(
         
         flowableWords.toObservable()
             .flatMap { allWords: List<Word> ->
-                // Filter words: length must be >= (gridSize - 1) AND < gridSize
-                // For grid 9: words with length 8 only (>= 8 and < 9)
+                // Filter words: length must be >= 3 AND < gridSize
+                // For grid 5: words with length 3 and 4 (>= 3 and < 5)
                 val filteredWords = allWords.filter { 
                     it.string.length >= minWordLength && it.string.length < maxWordLength 
                 }

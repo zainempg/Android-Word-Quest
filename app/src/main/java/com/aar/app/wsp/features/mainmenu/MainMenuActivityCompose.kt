@@ -263,6 +263,39 @@ fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
                     if (selectedIndex < gameRoundDimValues.size - 1) onIndexChange(selectedIndex + 1)
                 }
             }
+            
+            // Show word count based on grid size (grid size - 1 = max words)
+            val selectedSize = gameRoundDimValues[selectedIndex]
+            val maxWords = selectedSize - 1  // 4x4 = 3 words, 5x5 = 4 words, etc.
+            val minWords = 3  // Minimum is always 3 words
+            
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (selectedIndex == 0) {
+                    // 4x4 shows only 3 words
+                    Text(
+                        text = "$maxWords words puzzle",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = kidsFont,
+                        color = Color.White
+                    )
+                } else {
+                    // Larger grids show range: "3 - 4 words puzzle"
+                    Text(
+                        text = "$minWords - $maxWords words puzzle",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = kidsFont,
+                        color = Color.White
+                    )
+                }
+            }
         }
     }
 }
