@@ -68,20 +68,29 @@ class MainMenuActivityCompose : ComponentActivity() {
             val themeName = result.data?.getStringExtra(
                 ThemeSelectorActivityCompose.EXTRA_THEME_NAME
             ) ?: "Theme"
+            
+            // Check if a new grid size was selected from the dialog
+            val selectedGridSize = result.data?.getIntExtra(
+                ThemeSelectorActivityCompose.EXTRA_SELECTED_GRID_SIZE,
+                -1
+            ) ?: -1
+            
+            // Use selected grid size if provided, otherwise use pending
+            val gridSize = if (selectedGridSize > 0) selectedGridSize else pendingGridSize
 
-            // Start the game with selected theme
-            startNewGame(themeId, themeName)
+            // Start the game with selected theme and grid size
+            startNewGame(themeId, themeName, gridSize)
         }
     }
 
-    private fun startNewGame(gameThemeId: Int, themeName: String) {
+    private fun startNewGame(gameThemeId: Int, themeName: String, gridSize: Int = pendingGridSize) {
         val intent = Intent(this, GamePlayActivityCompose::class.java).apply {
             putExtra(GamePlayActivityCompose.EXTRA_GAME_DIFFICULTY, pendingDifficulty)
             putExtra(GamePlayActivityCompose.EXTRA_GAME_MODE, pendingGameMode)
             putExtra(GamePlayActivityCompose.EXTRA_GAME_THEME_ID, gameThemeId)
             putExtra(GamePlayActivityCompose.EXTRA_GAME_THEME_NAME, themeName)
-            putExtra(GamePlayActivityCompose.EXTRA_ROW_COUNT, pendingGridSize)
-            putExtra(GamePlayActivityCompose.EXTRA_COL_COUNT, pendingGridSize)
+            putExtra(GamePlayActivityCompose.EXTRA_ROW_COUNT, gridSize)
+            putExtra(GamePlayActivityCompose.EXTRA_COL_COUNT, gridSize)
         }
         startActivity(intent)
     }

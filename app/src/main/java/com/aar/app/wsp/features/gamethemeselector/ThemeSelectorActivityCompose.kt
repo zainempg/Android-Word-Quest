@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 
 // Material / Material3
@@ -33,12 +34,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 
 // Text Font / FontFamily
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 
 // Icons (optional)
 import androidx.compose.ui.draw.clip
@@ -84,6 +87,12 @@ class ThemeSelectorActivityCompose : ComponentActivity() {
             val themes by viewModel.onGameThemeLoaded.observeAsState(initial = emptyList())
             var isLoading by remember { mutableStateOf(themes.isEmpty()) }
             var isUpdating by remember { mutableStateOf(false) }
+            
+            // State for grid size selector dialog
+            var showGridSizeDialog by remember { mutableStateOf(false) }
+            var pendingThemeId by remember { mutableStateOf(0) }
+            var pendingThemeName by remember { mutableStateOf("") }
+            var availableGridSizes by remember { mutableStateOf<List<Int>>(emptyList()) }
 
             // Update loading state when themes change
             if (themes.isNotEmpty()) {
@@ -95,8 +104,22 @@ class ThemeSelectorActivityCompose : ComponentActivity() {
                 isLoading = isLoading,
                 isUpdating = isUpdating,
                 revisionNumber = viewModel.lastDataRevision,
-                onAllThemesClick = { onThemeSelected(GameTheme.NONE.id, "All Themes") },
-                onThemeClick = { themeItem -> onThemeSelected(themeItem.id, themeItem.name.ifEmpty { "Theme" }) },
+                onAllThemesClick = { 
+                    onThemeSelected(GameTheme.NONE.id, "All Themes") { sizes ->
+                        pendingThemeId = GameTheme.NONE.id
+                        pendingThemeName = "All Themes"
+                        availableGridSizes = sizes
+                        showGridSizeDialog = true
+                    }
+                },
+                onThemeClick = { themeItem -> 
+                    onThemeSelected(themeItem.id, themeItem.name.ifEmpty { "Theme" }) { sizes ->
+                        pendingThemeId = themeItem.id
+                        pendingThemeName = themeItem.name.ifEmpty { "Theme" }
+                        availableGridSizes = sizes
+                        showGridSizeDialog = true
+                    }
+                },
                 onUpdateClick = {
                     isUpdating = true
                     updateDisposable = viewModel.updateData()
@@ -114,10 +137,24 @@ class ThemeSelectorActivityCompose : ComponentActivity() {
                         })
                 }
             )
+            
+            // Grid Size Selector Dialog
+            if (showGridSizeDialog) {
+                GridSizeSelectorDialog(
+                    themeName = pendingThemeName,
+                    availableGridSizes = availableGridSizes,
+                    currentGridSize = gridRowCount,
+                    onGridSizeSelected = { selectedSize ->
+                        showGridSizeDialog = false
+                        returnWithNewGridSize(pendingThemeId, pendingThemeName, selectedSize)
+                    },
+                    onDismiss = { showGridSizeDialog = false }
+                )
+            }
         }
     }
 
-    private fun onThemeSelected(themeId: Int, themeName: String) {
+    private fun onThemeSelected(themeId: Int, themeName: String, onNoWords: (List<Int>) -> Unit) {
         viewModel.checkWordAvailability(themeId, gridRowCount, gridColCount)
             .subscribe { available ->
                 if (available) {
@@ -127,13 +164,30 @@ class ThemeSelectorActivityCompose : ComponentActivity() {
                     setResult(Activity.RESULT_OK, intent)
                     finish()
                 } else {
-                    Toast.makeText(
-                        this,
-                        "No words data to use, please select another theme or change grid size",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    // Get available grid sizes and show dialog
+                    viewModel.getAvailableGridSizes(themeId)
+                        .subscribe { sizes ->
+                            if (sizes.isNotEmpty()) {
+                                onNoWords(sizes)
+                            } else {
+                                Toast.makeText(
+                                    this,
+                                    "No words available for this theme",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
                 }
             }
+    }
+    
+    private fun returnWithNewGridSize(themeId: Int, themeName: String, gridSize: Int) {
+        val intent = Intent()
+        intent.putExtra(EXTRA_THEME_ID, themeId)
+        intent.putExtra(EXTRA_THEME_NAME, themeName)
+        intent.putExtra(EXTRA_SELECTED_GRID_SIZE, gridSize)
+        setResult(Activity.RESULT_OK, intent)
+        finish()
     }
 
     override fun onStop() {
@@ -146,6 +200,7 @@ class ThemeSelectorActivityCompose : ComponentActivity() {
         const val EXTRA_THEME_NAME = "game_theme_name"
         const val EXTRA_ROW_COUNT = "row_count"
         const val EXTRA_COL_COUNT = "col_count"
+        const val EXTRA_SELECTED_GRID_SIZE = "selected_grid_size"
     }
 }
 
@@ -473,6 +528,194 @@ fun UpdateWordsButton(
 }
 
 
+@Composable
+fun GridSizeSelectorDialog(
+    themeName: String,
+    availableGridSizes: List<Int>,
+    currentGridSize: Int,
+    onGridSizeSelected: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val kidsFont = FontFamily(Font(R.font.word_quest))
+    
+    // Grid colors matching theme selector
+    val gridColors = listOf(
+        Color(0xFF9CE850),  // Green
+        Color(0xFF15DBD3),  // Cyan
+        Color(0xFFFFD352),  // Yellow
+        Color(0xFFD2B7FF),  // Light Purple
+        Color(0xFFE6FF53),  // Lime
+        Color(0xFFFF8A65),  // Orange
+        Color(0xFF81D4FA),  // Light Blue
+        Color(0xFFF48FB1),  // Pink
+    )
+    
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(30.dp))
+                .background(Color(0xFFF3BC41))  // Golden border
+                .padding(5.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(26.dp))
+                    .background(Color(0xFFFF6EB5))  // Pink background like theme selector
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Title with stroke effect
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Select Grid Size",
+                            fontSize = 26.sp,
+                            fontFamily = kidsFont,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFAA2070),
+                            style = TextStyle(
+                                drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(width = 10f)
+                            )
+                        )
+                        Text(
+                            text = "Select Grid Size",
+                            fontSize = 26.sp,
+                            fontFamily = kidsFont,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    // Message in a bubble
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.White.copy(alpha = 0.9f))
+                            .padding(12.dp)
+                    ) {
+                        Text(
+                            text = "Grid ${currentGridSize}x${currentGridSize} needs different words!\nPick a grid size for \"$themeName\":",
+                            fontSize = 14.sp,
+                            fontFamily = kidsFont,
+                            color = Color(0xFF6B4E71),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Grid size buttons in scrollable row
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        contentPadding = PaddingValues(horizontal = 4.dp)
+                    ) {
+                        items(availableGridSizes) { size ->
+                            val colorIndex = (size - 3) % gridColors.size
+                            GridSizeButton(
+                                size = size,
+                                bgColor = gridColors[colorIndex],
+                                onClick = { onGridSizeSelected(size) }
+                            )
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(20.dp))
+                    
+                    // Cancel button - styled like other buttons
+                    Box(
+                        modifier = Modifier
+                            .width(140.dp)
+                            .height(50.dp)
+                            .clip(RoundedCornerShape(25.dp))
+                            .background(Color(0xFFF3BC41))  // Golden border
+                            .padding(4.dp)
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(Color(0xFF8F6CD9))  // Purple
+                            .clickable { onDismiss() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "Cancel",
+                                fontSize = 18.sp,
+                                fontFamily = kidsFont,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF5A3D8A),
+                                style = TextStyle(
+                                    drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(width = 6f)
+                                )
+                            )
+                            Text(
+                                text = "Cancel",
+                                fontSize = 18.sp,
+                                fontFamily = kidsFont,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun GridSizeButton(
+    size: Int,
+    bgColor: Color,
+    onClick: () -> Unit
+) {
+    val kidsFont = FontFamily(Font(R.font.word_quest))
+    
+    Box(
+        modifier = Modifier
+            .size(65.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFFF3BC41))  // Golden border
+            .padding(4.dp)
+            .clip(RoundedCornerShape(13.dp))
+            .background(bgColor)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Grid size text with stroke
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = "${size}x${size}",
+                    fontSize = 18.sp,
+                    fontFamily = kidsFont,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    style = TextStyle(
+                        drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(width = 4f)
+                    )
+                )
+                Text(
+                    text = "${size}x${size}",
+                    fontSize = 18.sp,
+                    fontFamily = kidsFont,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun SelectWordThemePreview() {
@@ -489,5 +732,17 @@ fun SelectWordThemePreview() {
         themes = sampleThemes,
         isLoading = false,
         revisionNumber = 5
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GridSizeSelectorDialogPreview() {
+    GridSizeSelectorDialog(
+        themeName = "Insects",
+        availableGridSizes = listOf(3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
+        currentGridSize = 10,
+        onGridSizeSelected = {},
+        onDismiss = {}
     )
 }

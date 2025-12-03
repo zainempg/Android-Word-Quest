@@ -22,6 +22,22 @@ interface WordDataSource {
     @Query("SELECT count(*) FROM words WHERE game_theme_id=:themeId AND length(string) < :maxChar")
     fun getWordsCount(themeId: Int, maxChar: Int): Single<Int>
 
+    // Get the maximum word length for a theme (to determine available grid sizes)
+    @Query("SELECT MAX(LENGTH(string)) FROM words WHERE game_theme_id=:themeId")
+    fun getMaxWordLength(themeId: Int): Single<Int>
+
+    // Get the maximum word length across all themes
+    @Query("SELECT MAX(LENGTH(string)) FROM words")
+    fun getMaxWordLength(): Single<Int>
+
+    // Get the minimum word length for a theme
+    @Query("SELECT MIN(LENGTH(string)) FROM words WHERE game_theme_id=:themeId")
+    fun getMinWordLength(themeId: Int): Single<Int>
+
+    // Get the minimum word length across all themes
+    @Query("SELECT MIN(LENGTH(string)) FROM words")
+    fun getMinWordLength(): Single<Int>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertAll(words: List<Word>)
 

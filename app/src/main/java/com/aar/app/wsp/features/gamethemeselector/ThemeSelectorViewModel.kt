@@ -80,6 +80,29 @@ class ThemeSelectorViewModel @Inject constructor(
             .flatMap(Function { count: Int -> Single.just(count > 0) } as Function<Int, Single<Boolean>>)
     }
 
+    /**
+     * Get available grid sizes for a theme based on word lengths
+     * Returns a list of grid sizes from (minWordLength + 1) up to 15
+     * Larger grids can always use shorter words
+     */
+    fun getAvailableGridSizes(themeId: Int): Single<List<Int>> {
+        val minLengthSource = if (themeId == GameTheme.NONE.id) 
+            wordDataSource.getMinWordLength() 
+        else 
+            wordDataSource.getMinWordLength(themeId)
+        
+        return minLengthSource.map { minLen ->
+            // Grid sizes from (minWordLength + 1) up to 15
+            // e.g., if min word is 2 letters, grids 3x3 to 15x15 are available
+            // Larger grids can always accommodate shorter words
+            val minGrid = max(3, minLen + 1)  // Minimum grid is 3x3
+            val maxGrid = 15  // Maximum grid is 15x15
+            (minGrid..maxGrid).toList()
+        }
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+    }
+
     val onGameThemeLoaded: LiveData<List<GameThemeItem>>
         get() = _onGameThemeLoaded
 
