@@ -148,9 +148,9 @@ class GamePlayViewModel @Inject constructor(
         setGameState(Generating(rowCount, colCount, gameName))
         
         // Get words for this theme
-        // For grid size N, get words with length from 3 to (N-1)
-        // e.g., Grid 5 -> words of length 3 and 4, Grid 6 -> words of length 3, 4, and 5
-        val minWordLength = 3  // Minimum word length is always 3
+        // For grid size N, get words with length from 2 to (N-1)
+        // e.g., Grid 5 -> words of length 2, 3, and 4, Grid 6 -> words of length 2, 3, 4, and 5
+        val minWordLength = 2  // Minimum word length is always 2
         val maxWordLength = rowCount  // Maximum word length < grid size
         
         val flowableWords: Flowable<List<Word>> = if (gameThemeId == GameTheme.NONE.id) {
