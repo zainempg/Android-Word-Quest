@@ -10,7 +10,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -22,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.animation.core.*
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.*
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.Alignment
@@ -57,9 +61,6 @@ import com.aar.app.wsp.model.GameData
 import com.aar.app.wsp.model.GameMode
 import com.aar.app.wsp.model.UsedWord
 import com.aar.app.wsp.model.UsedWord.AnswerLine
-import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayout
-import com.google.android.flexbox.JustifyContent
 import javax.inject.Inject
 
 class GamePlayActivityCompose : ComponentActivity() {
@@ -389,16 +390,21 @@ fun GameContent(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Word pills with animation for answered words
-        WordPills(
-            words = gameData.usedWords,
-            gameMode = gameData.gameMode,
-            kidsFont = kidsFont,
-            lastAnsweredWord = answerResult?.usedWord,
-            grayscale = preferences?.grayscale() == true
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
+        // Word pills - scrollable; grid stays fixed below
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+        ) {
+            WordPills(
+                words = gameData.usedWords,
+                gameMode = gameData.gameMode,
+                kidsFont = kidsFont,
+                lastAnsweredWord = answerResult?.usedWord,
+                grayscale = preferences?.grayscale() == true
+            )
+        }
 
         // Marathon mode - current word and countdown above the grid
         if (gameData.gameMode == GameMode.Marathon && currentWord != null) {
@@ -863,92 +869,64 @@ fun WordPills(
     // Capture the last answered word ID to trigger animation only once
     val lastAnsweredId = lastAnsweredWord?.id
 
-    // Use FlowRow-like layout with AndroidView for FlexboxLayout
-    AndroidView(
-        factory = { context ->
-            FlexboxLayout(context).apply {
-                flexWrap = FlexWrap.WRAP
-                justifyContent = JustifyContent.CENTER
+    FlowRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+    ) {
+        words.forEachIndexed { index, word ->
+            val pillColor = if (word.isAnswered) {
+                answeredColor
+            } else {
+                pillColors[index % pillColors.size]
             }
-        },
-        update = { flexbox ->
-            flexbox.removeAllViews()
-            words.forEachIndexed { index, word ->
-                val pillColor = if (word.isAnswered) {
-                    answeredColor // Yellow for answered (or gray if grayscale)
-                } else {
-                    pillColors[index % pillColors.size]
+            val shouldAnimate = lastAnsweredId == word.id &&
+                    word.isAnswered &&
+                    !animatedWordIds.contains(word.id)
+
+            val scale = remember { Animatable(1f) }
+            LaunchedEffect(shouldAnimate) {
+                if (shouldAnimate) {
+                    animatedWordIds.add(word.id)
+                    scale.animateTo(
+                        targetValue = 1.4f,
+                        animationSpec = repeatable(
+                            iterations = 3,
+                            animation = tween(75),
+                            repeatMode = RepeatMode.Reverse
+                        )
+                    )
                 }
+            }
 
-                // Only animate if this word was just answered AND hasn't been animated yet
-                val shouldAnimate = lastAnsweredId == word.id && 
-                                    word.isAnswered && 
-                                    !animatedWordIds.contains(word.id)
-
-                val textView = android.widget.TextView(flexbox.context).apply {
+            Box(
+                modifier = Modifier
+                    .scale(scale.value)
+                    .clip(RoundedCornerShape(50))
+                    .background(pillColor)
+                    .border(
+                        width = 4.dp,
+                        color = Color(0xFFFEC84D),
+                        shape = RoundedCornerShape(50)
+                    )
+                    .padding(horizontal = 18.dp, vertical = 8.dp)
+            ) {
+                Text(
                     text = if (gameMode == GameMode.Hidden && !word.isAnswered) {
                         "•".repeat(word.string.length)
                     } else {
                         word.string
-                    }
-                    textSize = 16f
-                    setTextColor(android.graphics.Color.parseColor("#333333"))
-                    typeface = android.graphics.Typeface.DEFAULT_BOLD
-                    setPadding(32, 16, 32, 16)
-
-                    if (word.isAnswered) {
-                        paintFlags = paintFlags or android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
-                    }
-
-                    // Create pill background
-                    val drawable = android.graphics.drawable.GradientDrawable().apply {
-                        shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                        cornerRadius = 50f
-                        setColor(android.graphics.Color.argb(
-                            255,
-                            (pillColor.red * 255).toInt(),
-                            (pillColor.green * 255).toInt(),
-                            (pillColor.blue * 255).toInt()
-                        ))
-                        setStroke(6, android.graphics.Color.parseColor("#FEC84D"))
-                    }
-                    background = drawable
-
-                    // Add bounce animation if just answered (bounce 2 times only, then stop)
-                    if (shouldAnimate) {
-                        // Mark this word as animated so it won't animate again
-                        animatedWordIds.add(word.id)
-                        
-                        val scaleAnimation = android.view.animation.ScaleAnimation(
-                            1.0f, 1.4f, 1.0f, 1.4f,
-                            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
-                            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f
-                        ).apply {
-                            duration = 150
-                            repeatCount = 3  // 2 full bounces = 4 half cycles (up-down-up-down)
-                            repeatMode = android.view.animation.Animation.REVERSE
-                            fillAfter = false  // Don't stay scaled after animation
-                            fillBefore = true
-                        }
-                        // Clear any existing animation first
-                        clearAnimation()
-                        startAnimation(scaleAnimation)
-                    }
-                }
-
-                val params = FlexboxLayout.LayoutParams(
-                    FlexboxLayout.LayoutParams.WRAP_CONTENT,
-                    FlexboxLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    setMargins(8, 8, 8, 8)
-                }
-                flexbox.addView(textView, params)
+                    },
+                    fontSize = 13.sp,
+                    color = Color(0xFF333333),
+                    fontWeight = FontWeight.Bold,
+                    textDecoration = if (word.isAnswered) TextDecoration.LineThrough else null
+                )
             }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-    )
+        }
+    }
 }
 
 @Composable
