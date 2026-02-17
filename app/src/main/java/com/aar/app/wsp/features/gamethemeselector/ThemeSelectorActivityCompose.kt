@@ -47,6 +47,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 
@@ -56,6 +59,7 @@ import com.aar.app.wsp.model.GameTheme
 
 // Preview
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.lifecycle.ViewModelProvider
 import io.reactivex.disposables.Disposable
 import javax.inject.Inject
@@ -298,7 +302,7 @@ fun SelectWordThemeScreen(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
 
@@ -374,31 +378,16 @@ fun AllThemesButton(onClick: () -> Unit = {}) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(
+                    OutlinedText(
                         text = "All Themes",
-                        fontSize = 24.sp,
-                        color = Color(0xFF5A3D8A),
+                        fontSize = 30.sp,
                         fontFamily = kidsFont,
-                        fontWeight = FontWeight.Bold,
-                        style = TextStyle(
-                            drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(width = 8f)
-                        )
-                    )
-                    Text(
-                        text = "All Themes",
-                        fontSize = 24.sp,
-                        color = Color.White,
-                        fontFamily = kidsFont,
-                        fontWeight = FontWeight.Bold
+                        fillColor = Color.White,
+                        strokeColor = Color(0xFFEC4899),
                     )
                 }
 
-                Spacer(modifier = Modifier.width(10.dp))
 
-                Text(
-                    text = "🎲",
-                    fontSize = 24.sp
-                )
             }
         }
     }
@@ -524,6 +513,79 @@ fun UpdateWordsButton(
                 }
             }
         }
+    }
+}
+@Composable
+fun OutlinedText(
+    text: String,
+    fontSize: TextUnit,
+    fontFamily: FontFamily,
+    modifier: Modifier = Modifier,
+    fillColor: Color = Color.White,
+    strokeColor: Color = Color(0xFFEC4899),
+    strokeWidth: Float = 8f,
+    letterSpacing: TextUnit = 3.sp
+) {
+    Box(modifier = modifier) {
+        // Outer shadow/depth layer (darkest, largest)
+        Text(
+            text = text,
+            style = TextStyle(
+                fontSize = fontSize,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = letterSpacing,
+                color = Color(0xFFEC4899),
+                drawStyle = Stroke(
+                    width = strokeWidth + 5f,
+                    join = StrokeJoin.Round,
+                    cap = StrokeCap.Round
+                )
+            )
+        )
+        // Middle outline layer
+        Text(
+            text = text,
+            style = TextStyle(
+                fontSize = fontSize,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = letterSpacing,
+                color = strokeColor,
+                drawStyle = Stroke(
+                    width = strokeWidth + 6f,
+                    join = StrokeJoin.Round,
+                    cap = StrokeCap.Round
+                )
+            )
+        )
+        // Inner highlight layer (gives 3D rounded look)
+        Text(
+            text = text,
+            style = TextStyle(
+                fontSize = fontSize,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = letterSpacing,
+                color = fillColor,
+                drawStyle = Stroke(
+                    width = strokeWidth,
+                    join = StrokeJoin.Round,
+                    cap = StrokeCap.Round
+                )
+            )
+        )
+        // Fill layer
+        Text(
+            text = text,
+            style = TextStyle(
+                fontSize = fontSize,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = letterSpacing,
+                color = fillColor
+            )
+        )
     }
 }
 
