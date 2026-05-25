@@ -1,4 +1,5 @@
 @file:Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
+@file:OptIn(ExperimentalLayoutApi::class)
 
 package com.aar.app.wsp.features.gameplay
 
@@ -13,6 +14,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.ui.platform.LocalDensity
@@ -48,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.ViewModelProvider
 import com.aar.app.wsp.R
+import com.aar.app.wsp.commons.PreviewDevices
 import com.aar.app.wsp.WordSearchApp
 import com.aar.app.wsp.commons.DurationFormatter
 import com.aar.app.wsp.commons.Util
@@ -831,7 +834,8 @@ fun ThemeNameBadge(
         }
     }
 }
-@Preview(showBackground = true)
+@Preview(showBackground = true, widthDp = PreviewDevices.PHONE_WIDTH, heightDp = 200, name = "Phone")
+@Preview(showBackground = true, widthDp = PreviewDevices.TABLET_WIDTH, heightDp = 240, name = "Tablet")
 @Composable
 fun ThemeNamePreview() {
     // Preview with mock data
@@ -961,7 +965,18 @@ fun GameFinishedOverlay(win: Boolean, kidsFont: FontFamily) {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(
+    showBackground = true,
+    widthDp = PreviewDevices.PHONE_WIDTH,
+    heightDp = PreviewDevices.PHONE_HEIGHT,
+    name = "Phone"
+)
+@Preview(
+    showBackground = true,
+    widthDp = PreviewDevices.TABLET_WIDTH,
+    heightDp = PreviewDevices.TABLET_HEIGHT,
+    name = "Tablet"
+)
 @Composable
 fun GamePlayScreenPreview() {
     // Preview with mock data

@@ -50,6 +50,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.aar.app.wsp.R
 import com.aar.app.wsp.WordSearchApp
+import com.aar.app.wsp.commons.PreviewDevices
 import com.aar.app.wsp.commons.DurationFormatter
 import com.aar.app.wsp.features.gameplay.GamePlayActivityCompose
 import com.aar.app.wsp.features.mainmenu.MainMenuActivityCompose
@@ -689,7 +690,18 @@ fun GameOverButton(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(
+    showBackground = true,
+    widthDp = PreviewDevices.PHONE_WIDTH,
+    heightDp = PreviewDevices.PHONE_HEIGHT,
+    name = "Phone"
+)
+@Preview(
+    showBackground = true,
+    widthDp = PreviewDevices.TABLET_WIDTH,
+    heightDp = PreviewDevices.TABLET_HEIGHT,
+    name = "Tablet"
+)
 @Composable
 fun GameOverScreenWinPreview() {
     // Preview with mock win data

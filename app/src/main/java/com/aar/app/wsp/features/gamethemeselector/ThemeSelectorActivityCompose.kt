@@ -12,16 +12,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 
 // Material / Material3
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 
 // Compose Runtime
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -52,13 +56,12 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 
 import com.aar.app.wsp.R
 import com.aar.app.wsp.WordSearchApp
 import com.aar.app.wsp.model.GameTheme
 
-// Preview
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.lifecycle.ViewModelProvider
 import io.reactivex.disposables.Disposable
@@ -780,7 +783,7 @@ fun GridSizeButton(
 
 @Preview(showBackground = true)
 @Composable
-fun SelectWordThemePreview() {
+fun SelectWordThemePreviews() {
     // Preview with sample data
     val sampleThemes = listOf(
         GameThemeItem().apply { id = 1; name = "Animals"; wordsCount = 45 },
@@ -799,7 +802,7 @@ fun SelectWordThemePreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun GridSizeSelectorDialogPreview() {
+fun GridSizeSelectorDialogPreviews() {
     GridSizeSelectorDialog(
         themeName = "Insects",
         availableGridSizes = listOf(3, 4, 5, 6, 7, 8, 9, 10, 11, 12),

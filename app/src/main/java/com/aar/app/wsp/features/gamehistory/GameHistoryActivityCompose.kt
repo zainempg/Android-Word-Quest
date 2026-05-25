@@ -30,6 +30,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
@@ -37,6 +38,7 @@ import androidx.lifecycle.lifecycleScope
 import com.aar.app.wsp.R
 import com.aar.app.wsp.WordSearchApp
 import com.aar.app.wsp.commons.DurationFormatter
+import com.aar.app.wsp.commons.PreviewDevices
 import com.aar.app.wsp.features.gameplay.GamePlayActivityCompose
 import com.aar.app.wsp.features.settings.SettingsActivityCompose
 import com.aar.app.wsp.model.GameDataInfo
@@ -483,7 +485,18 @@ fun Sparkles() {
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true, showSystemUi = true)
+@Preview(
+    showBackground = true,
+    widthDp = PreviewDevices.PHONE_WIDTH,
+    heightDp = PreviewDevices.PHONE_HEIGHT,
+    name = "Phone"
+)
+@Preview(
+    showBackground = true,
+    widthDp = PreviewDevices.TABLET_WIDTH,
+    heightDp = PreviewDevices.TABLET_HEIGHT,
+    name = "Tablet"
+)
 @Composable
 fun GameHistoryScreenPreview() {
     val sampleData = listOf(

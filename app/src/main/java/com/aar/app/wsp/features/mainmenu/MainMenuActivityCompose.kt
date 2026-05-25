@@ -1,16 +1,13 @@
 package com.aar.app.wsp.features.mainmenu
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -20,11 +17,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -40,6 +34,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aar.app.wsp.R
+import com.aar.app.wsp.commons.PreviewDevices
 import com.aar.app.wsp.features.gamehistory.GameHistoryActivityCompose
 import com.aar.app.wsp.features.gamethemeselector.ThemeSelectorActivityCompose
 import com.aar.app.wsp.features.settings.SettingsActivityCompose
@@ -51,12 +46,10 @@ import com.aar.app.wsp.model.GameTheme
 @Suppress("DEPRECATION")
 class MainMenuActivityCompose : ComponentActivity() {
 
-    // Store game parameters when navigating to theme selector
     private var pendingGridSize: Int = 4
     private var pendingGameMode: GameMode = GameMode.Normal
     private var pendingDifficulty: Difficulty = Difficulty.Easy
 
-    // Activity Result Launcher for theme selection
     private val themeSelectorLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -68,17 +61,13 @@ class MainMenuActivityCompose : ComponentActivity() {
             val themeName = result.data?.getStringExtra(
                 ThemeSelectorActivityCompose.EXTRA_THEME_NAME
             ) ?: "Theme"
-            
-            // Check if a new grid size was selected from the dialog
+
             val selectedGridSize = result.data?.getIntExtra(
                 ThemeSelectorActivityCompose.EXTRA_SELECTED_GRID_SIZE,
                 -1
             ) ?: -1
-            
-            // Use selected grid size if provided, otherwise use pending
-            val gridSize = if (selectedGridSize > 0) selectedGridSize else pendingGridSize
 
-            // Start the game with selected theme and grid size
+            val gridSize = if (selectedGridSize > 0) selectedGridSize else pendingGridSize
             startNewGame(themeId, themeName, gridSize)
         }
     }
@@ -95,7 +84,6 @@ class MainMenuActivityCompose : ComponentActivity() {
         startActivity(intent)
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -103,12 +91,10 @@ class MainMenuActivityCompose : ComponentActivity() {
         setContent {
             MainMenuScreen(
                 onPlayClicked = { row, col, mode, difficulty ->
-                    // Save parameters for when theme is selected
                     pendingGridSize = row
                     pendingGameMode = mode
                     pendingDifficulty = difficulty
 
-                    // Launch theme selector and wait for result
                     val intent = Intent(this, ThemeSelectorActivityCompose::class.java).apply {
                         putExtra(ThemeSelectorActivityCompose.EXTRA_ROW_COUNT, row)
                         putExtra(ThemeSelectorActivityCompose.EXTRA_COL_COUNT, col)
@@ -123,16 +109,13 @@ class MainMenuActivityCompose : ComponentActivity() {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun MainMenuScreen(
     onPlayClicked: (row: Int, col: Int, mode: GameMode, difficulty: Difficulty) -> Unit,
     onSettingClicked: () -> Unit = {},
     onHistoryClicked: () -> Unit = {}
 ) {
-
-    // State lifting
-    var selectedGridIndex by remember { mutableStateOf(0) } // default 4x4
+    var selectedGridIndex by remember { mutableStateOf(0) }
     var selectedGameMode by remember { mutableStateOf(GameMode.Normal) }
     var selectedDifficulty by remember { mutableStateOf(Difficulty.Easy) }
 
@@ -140,8 +123,6 @@ fun MainMenuScreen(
     val gridSizeDimension = gameRoundDimValues[selectedGridIndex]
 
     Box(modifier = Modifier.fillMaxSize()) {
-
-        // Background
         Image(
             painter = painterResource(id = R.drawable.main_activity_bg),
             contentDescription = null,
@@ -163,7 +144,6 @@ fun MainMenuScreen(
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header Image
             Image(
                 painter = painterResource(id = R.drawable.word_search),
                 contentDescription = null,
@@ -173,7 +153,6 @@ fun MainMenuScreen(
                 contentScale = ContentScale.Crop
             )
 
-            // Components
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -216,7 +195,7 @@ fun MainMenuScreen(
 @Composable
 fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
     val kidsFont = FontFamily(Font(R.font.word_quest))
-    val gameRoundDimValues = listOf(4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)  // Must match MainMenuScreen
+    val gameRoundDimValues = listOf(4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
 
     Box(modifier = Modifier.fillMaxWidth()) {
         Image(
@@ -226,10 +205,8 @@ fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
             contentScale = ContentScale.Crop
         )
         Column(
-            modifier = Modifier
-                .padding(top = 10.dp)
+            modifier = Modifier.padding(top = 10.dp)
         ) {
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -272,39 +249,6 @@ fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
                     if (selectedIndex < gameRoundDimValues.size - 1) onIndexChange(selectedIndex + 1)
                 }
             }
-            
-            // Show word count based on grid size (grid size - 1 = max words)
-            val selectedSize = gameRoundDimValues[selectedIndex]
-            val maxWords = selectedSize - 1  // 4x4 = 3 words, 5x5 = 4 words, etc.
-            val minWords = 3  // Minimum is always 3 words
-            
-//            Row(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(top = 4.dp),
-//                horizontalArrangement = Arrangement.Center,
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-//                if (selectedIndex == 0) {
-//                    // 4x4 shows only 3 words
-//                    Text(
-//                        text = "$maxWords words puzzle",
-//                        fontSize = 16.sp,
-//                        fontWeight = FontWeight.Bold,
-//                        fontFamily = kidsFont,
-//                        color = Color.White
-//                    )
-//                } else {
-//                    // Larger grids show range: "3 - 4 words puzzle"
-//                    Text(
-//                        text = "$minWords - $maxWords words puzzle",
-//                        fontSize = 16.sp,
-//                        fontWeight = FontWeight.Bold,
-//                        fontFamily = kidsFont,
-//                        color = Color.White
-//                    )
-//                }
-//            }
         }
     }
 }
@@ -317,11 +261,9 @@ fun GameModeSelector(
 ) {
     val kidsFont = FontFamily(Font(R.font.word_quest))
 
-    // All available game modes and difficulties
     val gameModes = listOf(GameMode.Normal, GameMode.Hidden, GameMode.CountDown, GameMode.Marathon)
     val difficulties = listOf(Difficulty.Easy, Difficulty.Medium, Difficulty.Hard)
 
-    // Get display names
     val gameModeNames = mapOf(
         GameMode.Normal to "RELAX",
         GameMode.Hidden to "HIDDEN",
@@ -334,7 +276,6 @@ fun GameModeSelector(
         Difficulty.Hard to "HARD"
     )
 
-    // Current indices
     val currentModeIndex = gameModes.indexOf(selectedGameMode)
     val currentDiffIndex = difficulties.indexOf(selectedDifficulty)
 
@@ -347,9 +288,9 @@ fun GameModeSelector(
         )
 
         Column(
-            modifier = Modifier
-                .padding(top = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally) {
+            modifier = Modifier.padding(top = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -363,7 +304,6 @@ fun GameModeSelector(
                 )
             }
 
-            // Game Mode Row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -372,7 +312,6 @@ fun GameModeSelector(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 0f, boxSize = 30.dp) {
-                    // Go to previous mode (wrap around)
                     val newIndex = if (currentModeIndex > 0) currentModeIndex - 1 else gameModes.size - 1
                     onChange(gameModes[newIndex], selectedDifficulty)
                 }
@@ -390,13 +329,11 @@ fun GameModeSelector(
                     )
                 }
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f, boxSize = 30.dp) {
-                    // Go to next mode (wrap around)
                     val newIndex = if (currentModeIndex < gameModes.size - 1) currentModeIndex + 1 else 0
                     onChange(gameModes[newIndex], selectedDifficulty)
                 }
             }
 
-            // Difficulty Row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -405,7 +342,6 @@ fun GameModeSelector(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 0f, boxSize = 30.dp) {
-                    // Go to previous difficulty (wrap around)
                     val newIndex = if (currentDiffIndex > 0) currentDiffIndex - 1 else difficulties.size - 1
                     onChange(selectedGameMode, difficulties[newIndex])
                 }
@@ -423,7 +359,6 @@ fun GameModeSelector(
                     )
                 }
                 RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f, boxSize = 30.dp) {
-                    // Go to next difficulty (wrap around)
                     val newIndex = if (currentDiffIndex < difficulties.size - 1) currentDiffIndex + 1 else 0
                     onChange(selectedGameMode, difficulties[newIndex])
                 }
@@ -434,7 +369,6 @@ fun GameModeSelector(
 
 @Composable
 fun PlayButton(onClick: () -> Unit) {
-    // Use the play button image directly
     Image(
         painter = painterResource(id = R.drawable.play_btn),
         contentDescription = "Play",
@@ -448,7 +382,6 @@ fun PlayButton(onClick: () -> Unit) {
 
 @Composable
 fun CircleMenuButton(icon: Int, size: Dp = 55.dp, onClick: () -> Unit) {
-    // Just display the button image directly (already has golden circle design)
     Image(
         painter = painterResource(id = icon),
         contentDescription = null,
@@ -459,7 +392,6 @@ fun CircleMenuButton(icon: Int, size: Dp = 55.dp, onClick: () -> Unit) {
     )
 }
 
-// Bubble text composable for rounded, 3D bubble-like text effect
 @Composable
 fun OutlinedText(
     text: String,
@@ -472,7 +404,6 @@ fun OutlinedText(
     letterSpacing: TextUnit = 3.sp
 ) {
     Box(modifier = modifier) {
-        // Outer shadow/depth layer (darkest, largest)
         Text(
             text = text,
             style = TextStyle(
@@ -488,7 +419,6 @@ fun OutlinedText(
                 )
             )
         )
-        // Middle outline layer
         Text(
             text = text,
             style = TextStyle(
@@ -504,7 +434,6 @@ fun OutlinedText(
                 )
             )
         )
-        // Inner highlight layer (gives 3D rounded look)
         Text(
             text = text,
             style = TextStyle(
@@ -520,7 +449,6 @@ fun OutlinedText(
                 )
             )
         )
-        // Fill layer
         Text(
             text = text,
             style = TextStyle(
@@ -545,27 +473,32 @@ fun RoundIconButton(icon: Int, rotate: Float, boxSize: Dp = 70.dp, onClick: () -
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(id = icon), contentDescription = null, modifier = Modifier
+            painter = painterResource(id = icon),
+            contentDescription = null,
+            modifier = Modifier
                 .size(boxSize * 0.9f)
                 .rotate(rotate)
         )
     }
 }
 
-
-@RequiresApi(Build.VERSION_CODES.Q)
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(
+    showBackground = true,
+    widthDp = PreviewDevices.PHONE_WIDTH,
+    heightDp = PreviewDevices.PHONE_HEIGHT,
+    name = "Phone"
+)
+@Preview(
+    showBackground = true,
+    widthDp = PreviewDevices.TABLET_WIDTH,
+    heightDp = PreviewDevices.TABLET_HEIGHT,
+    name = "Tablet"
+)
 @Composable
 fun MainMenuScreenPreview() {
     MainMenuScreen(
-        onPlayClicked = { row, col, mode, difficulty ->
-            // Preview dummy action
-        },
-        onSettingClicked = {
-            // Preview dummy action
-        },
-        onHistoryClicked = {
-            // Preview dummy action
-        }
+        onPlayClicked = { _, _, _, _ -> },
+        onSettingClicked = {},
+        onHistoryClicked = {}
     )
 }

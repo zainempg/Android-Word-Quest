@@ -7,7 +7,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +30,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -38,9 +43,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import com.aar.app.wsp.R
+import com.aar.app.wsp.commons.PreviewDevices
 import com.aar.app.wsp.custom.StreakView
 import kotlin.math.sin
 import kotlin.random.Random
+
+private const val APP_INFO_TEXT =
+    "Word search puzzle game with dynamically generated levels.\n\n" +
+        "Sound effects:\n" +
+        "• correct (freesound.org/s/131660/) & wrong (freesound.org/s/131657/) by Bertrof\n" +
+        "• winning (freesound.org/s/258142/) by Tuudurt\n" +
+        "• lose (freesound.org/s/270329/) by LittleRobotSoundFactory\n\n" +
+        "Developer: Developers Era"
 
 class SettingsActivityCompose : ComponentActivity() {
 
@@ -111,11 +125,7 @@ fun SettingsScreen(
                 )
         )
 
-        // Floating bubbles
-        FloatingBubbles()
-
-        // Sparkles
-        Sparkles()
+        SettingsAnimatedDecorations()
 
         Column(
             modifier = Modifier
@@ -292,13 +302,88 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // App Description, Sound Effects & Developer Credit - Combined Card
-            AboutInfoCard(
-                text = "Word search puzzle game with dynamically generated levels.\n\nSound effects:\n• correct (freesound.org/s/131660/) & wrong (freesound.org/s/131657/) by Bertrof\n• winning (freesound.org/s/258142/) by Tuudurt\n• lose (freesound.org/s/270329/) by LittleRobotSoundFactory\n\nDeveloper: Developers Era",
-                kidsFont = kidsFont
-            )
+            AppInfoExpandableSection(kidsFont = kidsFont)
 
             Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+fun SettingsAnimatedDecorations() {
+    if (!LocalInspectionMode.current) {
+        FloatingBubbles()
+        Sparkles()
+    }
+}
+
+@Composable
+fun AppInfoExpandableSection(kidsFont: FontFamily) {
+    var expanded by remember { mutableStateOf(false) }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+                .clip(RoundedCornerShape(30.dp))
+                .background(Color(0xFFB19CD9))
+                .border(4.dp, Color(0xFFFEC84D), RoundedCornerShape(30.dp))
+                .clickable { expanded = !expanded }
+                .padding(horizontal = 20.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "App Info",
+                    fontFamily = kidsFont,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF333333)
+                )
+                Text(
+                    text = if (expanded) "▲" else "▼",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF333333)
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .offset(x = 20.dp, y = 8.dp)
+                    .size(width = 80.dp, height = 8.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Color.White.copy(alpha = 0.4f))
+            )
+        }
+        AnimatedVisibility(
+            visible = expanded,
+            enter = expandVertically(),
+            exit = shrinkVertically()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color(0xFFFFE4EC))
+                    .border(4.dp, Color(0xFFFEC84D), RoundedCornerShape(24.dp))
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Text(
+                    text = APP_INFO_TEXT,
+                    fontFamily = kidsFont,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF333333),
+                    lineHeight = 22.sp
+                )
+            }
         }
     }
 }
@@ -722,6 +807,7 @@ fun AboutRow(
 
 @Composable
 fun FloatingBubbles() {
+    if (LocalInspectionMode.current) return
     val infiniteTransition = rememberInfiniteTransition(label = "bubbles")
 
     // Create multiple bubbles with different animations
@@ -791,6 +877,7 @@ data class BubbleData(
 
 @Composable
 fun Sparkles() {
+    if (LocalInspectionMode.current) return
     val infiniteTransition = rememberInfiniteTransition(label = "sparkles")
 
     val sparklePositions = remember {
@@ -904,11 +991,7 @@ fun SettingsScreenPreviewContent() {
                 )
         )
 
-        // Floating bubbles
-        FloatingBubbles()
-
-        // Sparkles
-        Sparkles()
+        SettingsAnimatedDecorations()
 
         Column(
             modifier = Modifier
@@ -1044,20 +1127,29 @@ fun SettingsScreenPreviewContent() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // App Description, Sound Effects & Developer Credit - Combined Card
-            AboutInfoCard(
-                text = "Word search puzzle game with dynamically generated levels.\n\nSound effects:\n• correct (freesound.org/s/131660/) & wrong (freesound.org/s/131657/) by Bertrof\n• winning (freesound.org/s/258142/) by Tuudurt\n• lose (freesound.org/s/270329/) by LittleRobotSoundFactory\n\nDeveloper: Developers Era",
-                kidsFont = kidsFont
-            )
+            AppInfoExpandableSection(kidsFont = kidsFont)
 
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true, showSystemUi = true)
+@Preview(
+    showBackground = true,
+    widthDp = PreviewDevices.PHONE_WIDTH,
+    heightDp = PreviewDevices.PHONE_HEIGHT,
+    name = "Phone"
+)
+@Preview(
+    showBackground = true,
+    widthDp = PreviewDevices.TABLET_WIDTH,
+    heightDp = PreviewDevices.TABLET_HEIGHT,
+    name = "Tablet"
+)
 @Composable
 fun SettingsScreenPreview() {
-    SettingsScreenPreviewContent()
+    MaterialTheme {
+        SettingsScreenPreviewContent()
+    }
 }
 
