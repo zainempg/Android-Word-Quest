@@ -32,6 +32,7 @@ import androidx.compose.animation.*
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -45,6 +46,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -366,265 +369,249 @@ fun GameContent(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    val isLargeScreen = LocalConfiguration.current.screenWidthDp >= 600
+    val contentPadding = if (isLargeScreen) 12.dp else 16.dp
+    val pillFontSize = if (isLargeScreen) 16.sp else 13.sp
+    val pillPaddingH = if (isLargeScreen) 22.dp else 18.dp
+    val pillPaddingV = if (isLargeScreen) 10.dp else 8.dp
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(contentPadding),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Header with timer and progress
-        GameHeader(
-            gameData = gameData,
-            timer = timer,
-            countDown = countDown,
-            answeredCount = gameData.answeredWordsCount,
-            totalWords = gameData.usedWords.size,
-            kidsFont = kidsFont
-        )
+            GameHeader(
+                gameData = gameData,
+                timer = timer,
+                countDown = countDown,
+                answeredCount = gameData.answeredWordsCount,
+                totalWords = gameData.usedWords.size,
+                kidsFont = kidsFont
+            )
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(if (isLargeScreen) 6.dp else 12.dp))
 
-        // Theme name with yellow stroke text
-        ThemeNameBadge(
-            themeName = themeName,
-            kidsFont = kidsFont
-        )
+            ThemeNameBadge(
+                themeName = themeName,
+                kidsFont = kidsFont
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(if (isLargeScreen) 4.dp else 8.dp))
 
-        // Word pills - scrollable; grid stays fixed below
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-        ) {
             WordPills(
                 words = gameData.usedWords,
                 gameMode = gameData.gameMode,
                 kidsFont = kidsFont,
                 lastAnsweredWord = answerResult?.usedWord,
-                grayscale = preferences?.grayscale() == true
+                grayscale = preferences?.grayscale() == true,
+                fontSize = pillFontSize,
+                horizontalPadding = pillPaddingH,
+                verticalPadding = pillPaddingV
             )
-        }
 
-        // Marathon mode - current word and countdown above the grid
-        if (gameData.gameMode == GameMode.Marathon && currentWord != null) {
-            MarathonWordProgress(
-                currentWord = currentWord,
-                currentWordCountDown = currentWordCountDown,
-                kidsFont = kidsFont
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        // CountDown mode - progress bar above the grid
-        if (gameData.gameMode == GameMode.CountDown && gameData.maxDuration > 0) {
-            CountDownProgressBar(
-                progress = countDown.toFloat() / gameData.maxDuration.toFloat(),
-                countDown = countDown,
-                kidsFont = kidsFont,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        // Letter Board (using AndroidView to embed custom view)
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .clip(RoundedCornerShape(24.dp))
-                .border(6.dp, Color(0xFFFEC84D), RoundedCornerShape(24.dp))
-                .background(Color(0xFFB8E6F6))
-                .padding(4.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            val density = LocalDensity.current
-            val availableWidthPx = constraints.maxWidth
-            val availableHeightPx = constraints.maxHeight
-            val gridSizePx = minOf(availableWidthPx, availableHeightPx)
-
-            // Calculate cell size based on grid dimensions
-            val rowCount = gameData.grid?.rowCount ?: 5
-            val colCount = gameData.grid?.colCount ?: 5
-            val maxDim = maxOf(rowCount, colCount)
-            
-            // Default cell size is 50px, calculate scale to fit available space
-            val defaultCellSize = 50
-            val defaultGridSize = defaultCellSize * maxDim
-            
-            // Auto scale grid: if enabled, always scale to fit; if disabled, only scale when grid is too big
-            val autoScale = preferences?.autoScaleGrid() != false
-            val needsScaling = autoScale || defaultGridSize > gridSizePx
-            val scaleFactor = if (needsScaling) {
-                gridSizePx.toFloat() / defaultGridSize.toFloat()
-            } else {
-                1f // No scaling - use original size
-            }
-
-            // Streak line colors - gray when grayscale is enabled, colorful otherwise
-            val isGrayscale = preferences?.grayscale() == true
-            val grayColor = android.graphics.Color.parseColor("#aa808080")
-            
-            val streakColors = if (isGrayscale) {
-                intArrayOf(grayColor) // Single gray color for all
-            } else {
-                intArrayOf(
-                    android.graphics.Color.parseColor("#80FF3EA5"), // Pink
-                    android.graphics.Color.parseColor("#804FC3F7"), // Light blue
-                    android.graphics.Color.parseColor("#8066BB6A"), // Green
-                    android.graphics.Color.parseColor("#80FFA726"), // Orange
-                    android.graphics.Color.parseColor("#80AB47BC"), // Purple
-                    android.graphics.Color.parseColor("#80EF5350"), // Red
-                    android.graphics.Color.parseColor("#8026C6DA"), // Cyan
-                    android.graphics.Color.parseColor("#80FFEE58"), // Yellow
-                    android.graphics.Color.parseColor("#808D6E63"), // Brown
-                    android.graphics.Color.parseColor("#805C6BC0"), // Indigo
+            if (gameData.gameMode == GameMode.Marathon && currentWord != null) {
+                MarathonWordProgress(
+                    currentWord = currentWord,
+                    currentWordCountDown = currentWordCountDown,
+                    kidsFont = kidsFont
                 )
+                Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // Track the current color index based on answered words
-            val answeredCount = gameData.usedWords.count { it.isAnswered }
-
-            AndroidView(
-                factory = { context ->
-                    LetterBoard(context, null).apply {
-                        letterBoardView = this
-
-                        // Set up the grid with calculated size
-                        gameData.grid?.let { grid ->
-                            dataAdapter = ArrayLetterGridDataAdapter(grid.array)
-                        }
-
-                        // Configure appearance - show/hide grid lines based on preference
-                        gridLineBackground.visibility = if (preferences?.showGridLine() == true) {
-                            android.view.View.VISIBLE
-                        } else {
-                            android.view.View.INVISIBLE
-                        }
-                        streakView.isSnapToGrid = preferences?.snapToGrid ?: StreakView.SnapType.ALWAYS_SNAP
-
-                        // Scale the board to fit available space using proper scale method
-                        scale(scaleFactor, scaleFactor)
-
-                        // Add existing streak lines for answered words first
-                        gameData.usedWords.filter { it.isAnswered }.forEachIndexed { index, usedWord ->
-                            usedWord.answerLine?.let { line ->
-                                val streakLine = StreakView.StreakLine().apply {
-                                    startIndex.set(line.startRow, line.startCol)
-                                    endIndex.set(line.endRow, line.endCol)
-                                    // Use saved color or assign based on index
-                                    color = if (line.color != 0) line.color else streakColors[index % streakColors.size]
-                                }
-                                addStreakLine(streakLine)
-                            }
-                        }
-
-                        // Set selection listener
-                        selectionListener = object : LetterBoard.OnLetterSelectionListener {
-                            override fun onSelectionBegin(streakLine: StreakView.StreakLine, str: String) {
-                                // Use answered count for color - this gets updated via recomposition
-                                streakLine.color = streakColors[answeredCount % streakColors.size]
-                            }
-
-                            override fun onSelectionDrag(streakLine: StreakView.StreakLine, str: String) {
-                                // Update during drag
-                            }
-
-                            override fun onSelectionEnd(streakLine: StreakView.StreakLine, str: String) {
-                                // Capture the center position of the streak line for flying animation
-                                lastStreakEndX = (streakLine.start.x + streakLine.end.x) / 2f
-                                lastStreakEndY = (streakLine.start.y + streakLine.end.y) / 2f
-                                
-                                val answerLine = AnswerLine(
-                                    streakLine.startIndex.row,
-                                    streakLine.startIndex.col,
-                                    streakLine.endIndex.row,
-                                    streakLine.endIndex.col
-                                )
-                                onWordSelected(str, answerLine, preferences?.reverseMatching() ?: false)
-                            }
-                        }
-                    }
-                },
-                update = { letterBoard ->
-                    // Update the selection listener with new color index
-                    letterBoard.selectionListener = object : LetterBoard.OnLetterSelectionListener {
-                        override fun onSelectionBegin(streakLine: StreakView.StreakLine, str: String) {
-                            // Use current answered count for color
-                            val currentAnsweredCount = gameData.usedWords.count { it.isAnswered }
-                            streakLine.color = streakColors[currentAnsweredCount % streakColors.size]
-                        }
-
-                        override fun onSelectionDrag(streakLine: StreakView.StreakLine, str: String) {
-                            // Update during drag
-                        }
-
-                        override fun onSelectionEnd(streakLine: StreakView.StreakLine, str: String) {
-                            // Capture the center position of the streak line for flying animation
-                            lastStreakEndX = (streakLine.start.x + streakLine.end.x) / 2f
-                            lastStreakEndY = (streakLine.start.y + streakLine.end.y) / 2f
-                            
-                            val answerLine = AnswerLine(
-                                streakLine.startIndex.row,
-                                streakLine.startIndex.col,
-                                streakLine.endIndex.row,
-                                streakLine.endIndex.col
-                            )
-                            onWordSelected(str, answerLine, preferences?.reverseMatching() ?: false)
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-    }
-    
-        // Flying text overlay - flies slowly, gets bigger, then fades out
-        if (showFlyingText && flyingWord != null) {
-            val progress = flyAnimationProgress.value
-            
-            // Calculate position - start from grid area (bottom), fly to pills area (top)
-            val startYOffset = 180f  // Starting position offset (from grid area)
-            val endYOffset = -250f   // End position offset (toward pills area)
-            val currentYOffset = startYOffset + (endYOffset - startYOffset) * progress
-            
-            // Scale: start small, get BIGGER as it flies up (1.0 -> 2.0)
-            val scale = 1.0f + (1.2f * progress)
-            
-            // Alpha: start fully visible, fade out slowly in the last 40%
-            val alpha = if (progress > 0.6f) {
-                1f - ((progress - 0.6f) / 0.4f)
-            } else {
-                1f
+            if (gameData.gameMode == GameMode.CountDown && gameData.maxDuration > 0) {
+                CountDownProgressBar(
+                    progress = countDown.toFloat() / gameData.maxDuration.toFloat(),
+                    countDown = countDown,
+                    kidsFont = kidsFont,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
             }
-            
-            Box(
-                modifier = Modifier.fillMaxSize(),
+
+            BoxWithConstraints(
+                modifier = Modifier
+                    .weight(1f, fill = true)
+                    .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = flyingWord!!,
-                    fontFamily = kidsFont,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp,
-                    color = Color(0xFFFEE440).copy(alpha = alpha),
-                    modifier = Modifier
-                        .offset(y = currentYOffset.dp)
-                        .scale(scale),
-                    style = TextStyle(
-                        shadow = Shadow(
-                            color = Color.Black.copy(alpha = alpha * 0.8f),
-                            blurRadius = 12f,
-                            offset = Offset(4f, 4f)
-                        )
+                val density = LocalDensity.current
+                val frameInset = 8.dp
+                val gridSide = minOf(maxWidth, maxHeight)
+                val gridSidePx = with(density) {
+                    (gridSide - frameInset * 2).coerceAtLeast(1.dp).roundToPx()
+                }
+
+                val rowCount = gameData.grid?.rowCount ?: 5
+                val colCount = gameData.grid?.colCount ?: 5
+                val maxDim = maxOf(rowCount, colCount)
+                val defaultGridSize = 50 * maxDim
+                val autoScale = preferences?.autoScaleGrid() != false
+                val scaleFactor = if (autoScale || defaultGridSize > gridSidePx) {
+                    gridSidePx.toFloat() / defaultGridSize.toFloat()
+                } else {
+                    1f
+                }
+
+                val isGrayscale = preferences?.grayscale() == true
+                val grayColor = android.graphics.Color.parseColor("#aa808080")
+                val streakColors = if (isGrayscale) {
+                    intArrayOf(grayColor)
+                } else {
+                    intArrayOf(
+                        android.graphics.Color.parseColor("#80FF3EA5"),
+                        android.graphics.Color.parseColor("#804FC3F7"),
+                        android.graphics.Color.parseColor("#8066BB6A"),
+                        android.graphics.Color.parseColor("#80FFA726"),
+                        android.graphics.Color.parseColor("#80AB47BC"),
+                        android.graphics.Color.parseColor("#80EF5350"),
+                        android.graphics.Color.parseColor("#8026C6DA"),
+                        android.graphics.Color.parseColor("#80FFEE58"),
+                        android.graphics.Color.parseColor("#808D6E63"),
+                        android.graphics.Color.parseColor("#805C6BC0"),
                     )
-                )
+                }
+                val answeredCount = gameData.usedWords.count { it.isAnswered }
+
+                Box(
+                    modifier = Modifier
+                        .size(gridSide)
+                        .clip(RoundedCornerShape(24.dp))
+                        .border(6.dp, Color(0xFFFEC84D), RoundedCornerShape(24.dp))
+                        .background(Color(0xFFB8E6F6))
+                        .padding(4.dp)
+                ) {
+                    key(gridSidePx, rowCount, colCount, scaleFactor) {
+                        AndroidView(
+                            factory = { context ->
+                                LetterBoard(context, null).apply {
+                                    letterBoardView = this
+                                    gameData.grid?.let { grid ->
+                                        dataAdapter = ArrayLetterGridDataAdapter(grid.array)
+                                    }
+                                    gridLineBackground.visibility = if (preferences?.showGridLine() == true) {
+                                        android.view.View.VISIBLE
+                                    } else {
+                                        android.view.View.INVISIBLE
+                                    }
+                                    streakView.isSnapToGrid =
+                                        preferences?.snapToGrid ?: StreakView.SnapType.ALWAYS_SNAP
+                                    scale(scaleFactor, scaleFactor)
+
+                                    gameData.usedWords.filter { it.isAnswered }
+                                        .forEachIndexed { index, usedWord ->
+                                            usedWord.answerLine?.let { line ->
+                                                val streakLine = StreakView.StreakLine().apply {
+                                                    startIndex.set(line.startRow, line.startCol)
+                                                    endIndex.set(line.endRow, line.endCol)
+                                                    color = if (line.color != 0) {
+                                                        line.color
+                                                    } else {
+                                                        streakColors[index % streakColors.size]
+                                                    }
+                                                }
+                                                addStreakLine(streakLine)
+                                            }
+                                        }
+
+                                    selectionListener = createSelectionListener(
+                                        streakColors = streakColors,
+                                        colorIndex = answeredCount,
+                                        onStreakEnd = { x, y, str, line ->
+                                            lastStreakEndX = x
+                                            lastStreakEndY = y
+                                            onWordSelected(
+                                                str,
+                                                line,
+                                                preferences?.reverseMatching() ?: false
+                                            )
+                                        }
+                                    )
+                                }
+                            },
+                            update = { letterBoard ->
+                                val currentAnsweredCount = gameData.usedWords.count { it.isAnswered }
+                                letterBoard.selectionListener = createSelectionListener(
+                                    streakColors = streakColors,
+                                    colorIndex = currentAnsweredCount,
+                                    onStreakEnd = { x, y, str, line ->
+                                        lastStreakEndX = x
+                                        lastStreakEndY = y
+                                        onWordSelected(
+                                            str,
+                                            line,
+                                            preferences?.reverseMatching() ?: false
+                                        )
+                                    }
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .align(Alignment.Center)
+                        )
+                    }
+
+                    if (showFlyingText && flyingWord != null) {
+                        val progress = flyAnimationProgress.value
+                        val textScale = 1f + (0.6f * progress)
+                        val alpha = if (progress > 0.6f) {
+                            1f - ((progress - 0.6f) / 0.4f)
+                        } else {
+                            1f
+                        }
+                        val liftPx = 100f * progress
+
+                        Text(
+                            text = flyingWord!!,
+                            fontFamily = kidsFont,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp,
+                            color = Color(0xFFFEE440).copy(alpha = alpha),
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .offset(
+                                    x = with(density) { flyStartX.toDp() } - 20.dp,
+                                    y = with(density) { (flyStartY - liftPx).toDp() } - 12.dp
+                                )
+                                .scale(textScale),
+                            style = TextStyle(
+                                shadow = Shadow(
+                                    color = Color.Black.copy(alpha = alpha * 0.8f),
+                                    blurRadius = 8f,
+                                    offset = Offset(2f, 2f)
+                                )
+                            )
+                        )
+                    }
+                }
             }
+        }
+}
+
+private fun createSelectionListener(
+    streakColors: IntArray,
+    colorIndex: Int,
+    onStreakEnd: (Float, Float, String, UsedWord.AnswerLine) -> Unit
+): LetterBoard.OnLetterSelectionListener {
+    return object : LetterBoard.OnLetterSelectionListener {
+        override fun onSelectionBegin(streakLine: StreakView.StreakLine, str: String) {
+            streakLine.color = streakColors[colorIndex % streakColors.size]
+        }
+
+        override fun onSelectionDrag(streakLine: StreakView.StreakLine, str: String) = Unit
+
+        override fun onSelectionEnd(streakLine: StreakView.StreakLine, str: String) {
+            val centerX = (streakLine.start.x + streakLine.end.x) / 2f
+            val centerY = (streakLine.start.y + streakLine.end.y) / 2f
+            val answerLine = UsedWord.AnswerLine(
+                streakLine.startIndex.row,
+                streakLine.startIndex.col,
+                streakLine.endIndex.row,
+                streakLine.endIndex.col
+            )
+            onStreakEnd(centerX, centerY, str, answerLine)
         }
     }
 }
@@ -851,7 +838,10 @@ fun WordPills(
     gameMode: GameMode,
     kidsFont: FontFamily,
     lastAnsweredWord: UsedWord? = null,
-    grayscale: Boolean = false
+    grayscale: Boolean = false,
+    fontSize: TextUnit = 13.sp,
+    horizontalPadding: Dp = 18.dp,
+    verticalPadding: Dp = 8.dp
 ) {
     // Colors for word pills - gray when grayscale is enabled
     val grayColor = Color(0xFF808080)
@@ -915,7 +905,7 @@ fun WordPills(
                         color = Color(0xFFFEC84D),
                         shape = RoundedCornerShape(50)
                     )
-                    .padding(horizontal = 18.dp, vertical = 8.dp)
+                    .padding(horizontal = horizontalPadding, vertical = verticalPadding)
             ) {
                 Text(
                     text = if (gameMode == GameMode.Hidden && !word.isAnswered) {
@@ -923,7 +913,7 @@ fun WordPills(
                     } else {
                         word.string
                     },
-                    fontSize = 13.sp,
+                    fontSize = fontSize,
                     color = Color(0xFF333333),
                     fontWeight = FontWeight.Bold,
                     textDecoration = if (word.isAnswered) TextDecoration.LineThrough else null

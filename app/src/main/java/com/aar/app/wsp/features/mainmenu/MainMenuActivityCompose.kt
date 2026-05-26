@@ -10,7 +10,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -195,26 +194,26 @@ fun MainMenuScreen(
     val isFold = screenWidth >= 600 && screenWidth < 840
 
     val scale = when {
-        isTablet -> 1.12f
-        isFold -> 1.06f
+        isTablet -> 1.45f
+        isFold -> 1.15f
         else -> 1f
     }
 
     val textScale = when {
-        isTablet -> 1.03f
-        isFold -> 1.01f
+        isTablet -> 1.55f
+        isFold -> 1.18f
         else -> 1f
     }
 
     val buttonScale = when {
-        isTablet -> 1.08f
-        isFold -> 1.03f
+        isTablet -> 1.45f
+        isFold -> 1.12f
         else -> 1f
     }
 
     val contentWidthFraction = when {
-        isTablet -> 0.62f
-        isFold -> 0.82f
+        isTablet -> 0.72f
+        isFold -> 0.90f
         else -> 1f
     }
 
@@ -260,7 +259,7 @@ fun MainMenuScreen(
 
                 modifier = Modifier
                     .fillMaxWidth(
-                        if (isTablet) 0.55f else 0.9f
+                        if (isTablet) 0.72f else 0.9f
                     )
                     .padding(horizontal = (20 * scale).dp),
 
@@ -280,7 +279,8 @@ fun MainMenuScreen(
                 GridSize(
                     selectedIndex = selectedGridIndex,
                     scale = scale,
-                    textScale = textScale
+                    textScale = textScale,
+                    isTablet = isTablet
                 ) {
                     selectedGridIndex = it
                 }
@@ -289,14 +289,18 @@ fun MainMenuScreen(
                     selectedGameMode = selectedGameMode,
                     selectedDifficulty = selectedDifficulty,
                     scale = scale,
-                    textScale = textScale
+                    textScale = textScale,
+                    isTablet = isTablet
                 ) { newMode, newDiff ->
 
                     selectedGameMode = newMode
                     selectedDifficulty = newDiff
                 }
 
-                PlayButton(scale = buttonScale) {
+                PlayButton(
+                    scale = buttonScale,
+                    isTablet = isTablet
+                ) {
 
                     onPlayClicked(
                         gridSizeDimension,
@@ -319,13 +323,13 @@ fun MainMenuScreen(
 
                     CircleMenuButton(
                         icon = R.drawable.ic_history,
-                        size = (50 * buttonScale).dp,
+                        size = if (isTablet) 82.dp else (50 * buttonScale).dp,
                         onClick = onHistoryClicked
                     )
 
                     CircleMenuButton(
                         icon = R.drawable.ic_setting,
-                        size = (50 * buttonScale).dp,
+                        size = if (isTablet) 82.dp else (50 * buttonScale).dp,
                         onClick = onSettingClicked
                     )
                 }
@@ -339,6 +343,7 @@ fun GridSize(
     selectedIndex: Int,
     scale: Float,
     textScale: Float,
+    isTablet: Boolean,
     onIndexChange: (Int) -> Unit
 ) {
 
@@ -391,7 +396,7 @@ fun GridSize(
                 RoundIconButton(
                     icon = R.drawable.back_arrow,
                     rotate = 0f,
-                    boxSize = (62 * buttonScale(scale)).dp
+                    boxSize = if (isTablet) 95.dp else 62.dp
                 ) {
 
                     if (selectedIndex > 0) {
@@ -406,7 +411,7 @@ fun GridSize(
 
                     OutlinedText(
                         text = "${gameRoundDimValues[selectedIndex]} x ${gameRoundDimValues[selectedIndex]}",
-                        fontSize = (60 * textScale).sp,
+                        fontSize = if (isTablet) 90.sp else (60 * textScale).sp,
                         fontFamily = kidsFont,
                         fillColor = Color.White,
                         strokeColor = Color(0xFFEC4899),
@@ -417,7 +422,7 @@ fun GridSize(
                 RoundIconButton(
                     icon = R.drawable.back_arrow,
                     rotate = 180f,
-                    boxSize = (62 * buttonScale(scale)).dp
+                    boxSize = if (isTablet) 95.dp else 62.dp
                 ) {
 
                     if (selectedIndex < gameRoundDimValues.size - 1) {
@@ -435,6 +440,7 @@ fun GameModeSelector(
     selectedDifficulty: Difficulty,
     scale: Float,
     textScale: Float,
+    isTablet: Boolean,
     onChange: (GameMode, Difficulty) -> Unit
 ) {
 
@@ -515,7 +521,7 @@ fun GameModeSelector(
                 RoundIconButton(
                     icon = R.drawable.back_arrow,
                     rotate = 0f,
-                    boxSize = (45 * buttonScale(scale)).dp
+                    boxSize = if (isTablet) 70.dp else 45.dp
                 ) {
 
                     val newIndex =
@@ -537,7 +543,7 @@ fun GameModeSelector(
 
                     OutlinedText(
                         text = gameModeNames[selectedGameMode] ?: "RELAX",
-                        fontSize = (20 * textScale).sp,
+                        fontSize = if (isTablet) 34.sp else (20 * textScale).sp,
                         fontFamily = kidsFont,
                         fillColor = Color.White,
                         strokeColor = Color(0xFFEC4899),
@@ -548,7 +554,7 @@ fun GameModeSelector(
                 RoundIconButton(
                     icon = R.drawable.back_arrow,
                     rotate = 180f,
-                    boxSize = (45 * buttonScale(scale)).dp
+                    boxSize = if (isTablet) 70.dp else 45.dp
                 ) {
 
                     val newIndex =
@@ -577,7 +583,7 @@ fun GameModeSelector(
                 RoundIconButton(
                     icon = R.drawable.back_arrow,
                     rotate = 0f,
-                    boxSize = (40 * buttonScale(scale)).dp
+                    boxSize = if (isTablet) 65.dp else 40.dp
                 ) {
 
                     val newIndex =
@@ -599,7 +605,7 @@ fun GameModeSelector(
 
                     OutlinedText(
                         text = difficultyNames[selectedDifficulty] ?: "EASY",
-                        fontSize = (20 * textScale).sp,
+                        fontSize = if (isTablet) 34.sp else (20 * textScale).sp,
                         fontFamily = kidsFont,
                         fillColor = Color.White,
                         strokeColor = Color(0xFFEC4899),
@@ -610,7 +616,7 @@ fun GameModeSelector(
                 RoundIconButton(
                     icon = R.drawable.back_arrow,
                     rotate = 180f,
-                    boxSize = (40 * buttonScale(scale)).dp
+                    boxSize = if (isTablet) 65.dp else 40.dp
                 ) {
 
                     val newIndex =
@@ -629,17 +635,10 @@ fun GameModeSelector(
     }
 }
 
-fun buttonScale(scale: Float): Float {
-    return when {
-        scale > 1.1f -> 1.08f
-        scale > 1f -> 1.03f
-        else -> 1f
-    }
-}
-
 @Composable
 fun PlayButton(
     scale: Float,
+    isTablet: Boolean,
     onClick: () -> Unit
 ) {
 
@@ -648,8 +647,8 @@ fun PlayButton(
         contentDescription = "Play",
 
         modifier = Modifier
-            .width((145 * scale).dp)
-            .height((56 * scale).dp)
+            .width(if (isTablet) 240.dp else (145 * scale).dp)
+            .height(if (isTablet) 92.dp else (56 * scale).dp)
             .clip(RoundedCornerShape(49.dp))
             .clickable { onClick() }
     )
