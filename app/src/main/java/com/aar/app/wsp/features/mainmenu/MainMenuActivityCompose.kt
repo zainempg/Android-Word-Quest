@@ -10,6 +10,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -23,6 +24,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -36,9 +38,9 @@ import androidx.compose.ui.unit.sp
 import com.aar.app.wsp.R
 import com.aar.app.wsp.commons.PreviewDevices
 import com.aar.app.wsp.features.gamehistory.GameHistoryActivityCompose
+import com.aar.app.wsp.features.gameplay.GamePlayActivityCompose
 import com.aar.app.wsp.features.gamethemeselector.ThemeSelectorActivityCompose
 import com.aar.app.wsp.features.settings.SettingsActivityCompose
-import com.aar.app.wsp.features.gameplay.GamePlayActivityCompose
 import com.aar.app.wsp.model.Difficulty
 import com.aar.app.wsp.model.GameMode
 import com.aar.app.wsp.model.GameTheme
@@ -53,11 +55,14 @@ class MainMenuActivityCompose : ComponentActivity() {
     private val themeSelectorLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
+
         if (result.resultCode == RESULT_OK) {
+
             val themeId = result.data?.getIntExtra(
                 ThemeSelectorActivityCompose.EXTRA_THEME_ID,
                 GameTheme.NONE.id
             ) ?: GameTheme.NONE.id
+
             val themeName = result.data?.getStringExtra(
                 ThemeSelectorActivityCompose.EXTRA_THEME_NAME
             ) ?: "Theme"
@@ -67,43 +72,110 @@ class MainMenuActivityCompose : ComponentActivity() {
                 -1
             ) ?: -1
 
-            val gridSize = if (selectedGridSize > 0) selectedGridSize else pendingGridSize
+            val gridSize =
+                if (selectedGridSize > 0) selectedGridSize else pendingGridSize
+
             startNewGame(themeId, themeName, gridSize)
         }
     }
 
-    private fun startNewGame(gameThemeId: Int, themeName: String, gridSize: Int = pendingGridSize) {
+    private fun startNewGame(
+        gameThemeId: Int,
+        themeName: String,
+        gridSize: Int = pendingGridSize
+    ) {
+
         val intent = Intent(this, GamePlayActivityCompose::class.java).apply {
-            putExtra(GamePlayActivityCompose.EXTRA_GAME_DIFFICULTY, pendingDifficulty)
-            putExtra(GamePlayActivityCompose.EXTRA_GAME_MODE, pendingGameMode)
-            putExtra(GamePlayActivityCompose.EXTRA_GAME_THEME_ID, gameThemeId)
-            putExtra(GamePlayActivityCompose.EXTRA_GAME_THEME_NAME, themeName)
-            putExtra(GamePlayActivityCompose.EXTRA_ROW_COUNT, gridSize)
-            putExtra(GamePlayActivityCompose.EXTRA_COL_COUNT, gridSize)
+
+            putExtra(
+                GamePlayActivityCompose.EXTRA_GAME_DIFFICULTY,
+                pendingDifficulty
+            )
+
+            putExtra(
+                GamePlayActivityCompose.EXTRA_GAME_MODE,
+                pendingGameMode
+            )
+
+            putExtra(
+                GamePlayActivityCompose.EXTRA_GAME_THEME_ID,
+                gameThemeId
+            )
+
+            putExtra(
+                GamePlayActivityCompose.EXTRA_GAME_THEME_NAME,
+                themeName
+            )
+
+            putExtra(
+                GamePlayActivityCompose.EXTRA_ROW_COUNT,
+                gridSize
+            )
+
+            putExtra(
+                GamePlayActivityCompose.EXTRA_COL_COUNT,
+                gridSize
+            )
         }
+
         startActivity(intent)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         enableEdgeToEdge()
+
         super.onCreate(savedInstanceState)
 
         setContent {
+
             MainMenuScreen(
+
                 onPlayClicked = { row, col, mode, difficulty ->
+
                     pendingGridSize = row
                     pendingGameMode = mode
                     pendingDifficulty = difficulty
 
-                    val intent = Intent(this, ThemeSelectorActivityCompose::class.java).apply {
-                        putExtra(ThemeSelectorActivityCompose.EXTRA_ROW_COUNT, row)
-                        putExtra(ThemeSelectorActivityCompose.EXTRA_COL_COUNT, col)
-                    }
+                    val intent =
+                        Intent(this, ThemeSelectorActivityCompose::class.java).apply {
+
+                            putExtra(
+                                ThemeSelectorActivityCompose.EXTRA_ROW_COUNT,
+                                row
+                            )
+
+                            putExtra(
+                                ThemeSelectorActivityCompose.EXTRA_COL_COUNT,
+                                col
+                            )
+                        }
+
                     themeSelectorLauncher.launch(intent)
-                    overridePendingTransition(R.anim.slide_in, R.anim.slide_out)
+
+                    overridePendingTransition(
+                        R.anim.slide_in,
+                        R.anim.slide_out
+                    )
                 },
-                onSettingClicked = { startActivity(Intent(this, SettingsActivityCompose::class.java)) },
-                onHistoryClicked = { startActivity(Intent(this, GameHistoryActivityCompose::class.java)) }
+
+                onSettingClicked = {
+                    startActivity(
+                        Intent(
+                            this,
+                            SettingsActivityCompose::class.java
+                        )
+                    )
+                },
+
+                onHistoryClicked = {
+                    startActivity(
+                        Intent(
+                            this,
+                            GameHistoryActivityCompose::class.java
+                        )
+                    )
+                }
             )
         }
     }
@@ -115,14 +187,50 @@ fun MainMenuScreen(
     onSettingClicked: () -> Unit = {},
     onHistoryClicked: () -> Unit = {}
 ) {
+
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+
+    val isTablet = screenWidth >= 840
+    val isFold = screenWidth >= 600 && screenWidth < 840
+
+    val scale = when {
+        isTablet -> 1.12f
+        isFold -> 1.06f
+        else -> 1f
+    }
+
+    val textScale = when {
+        isTablet -> 1.03f
+        isFold -> 1.01f
+        else -> 1f
+    }
+
+    val buttonScale = when {
+        isTablet -> 1.08f
+        isFold -> 1.03f
+        else -> 1f
+    }
+
+    val contentWidthFraction = when {
+        isTablet -> 0.62f
+        isFold -> 0.82f
+        else -> 1f
+    }
+
     var selectedGridIndex by remember { mutableStateOf(0) }
     var selectedGameMode by remember { mutableStateOf(GameMode.Normal) }
     var selectedDifficulty by remember { mutableStateOf(Difficulty.Easy) }
 
-    val gameRoundDimValues = listOf(4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+    val gameRoundDimValues =
+        listOf(4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+
     val gridSizeDimension = gameRoundDimValues[selectedGridIndex]
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+
         Image(
             painter = painterResource(id = R.drawable.main_activity_bg),
             contentDescription = null,
@@ -140,36 +248,56 @@ fun MainMenuScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .padding(bottom = 20.dp),
+                .padding(bottom = (20 * scale).dp),
+
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Image(
                 painter = painterResource(id = R.drawable.word_search),
                 contentDescription = null,
+
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                contentScale = ContentScale.Crop
+                    .fillMaxWidth(
+                        if (isTablet) 0.55f else 0.9f
+                    )
+                    .padding(horizontal = (20 * scale).dp),
+
+                contentScale = ContentScale.FillWidth
             )
 
             Column(
+                modifier = Modifier.fillMaxWidth(contentWidthFraction),
+
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+
+                verticalArrangement = Arrangement.spacedBy(
+                    (12 * scale).dp
+                )
             ) {
-                GridSize(selectedIndex = selectedGridIndex) { newIndex ->
-                    selectedGridIndex = newIndex
+
+                GridSize(
+                    selectedIndex = selectedGridIndex,
+                    scale = scale,
+                    textScale = textScale
+                ) {
+                    selectedGridIndex = it
                 }
 
                 GameModeSelector(
                     selectedGameMode = selectedGameMode,
-                    selectedDifficulty = selectedDifficulty
+                    selectedDifficulty = selectedDifficulty,
+                    scale = scale,
+                    textScale = textScale
                 ) { newMode, newDiff ->
+
                     selectedGameMode = newMode
                     selectedDifficulty = newDiff
                 }
 
-                PlayButton {
+                PlayButton(scale = buttonScale) {
+
                     onPlayClicked(
                         gridSizeDimension,
                         gridSizeDimension,
@@ -181,11 +309,25 @@ fun MainMenuScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 30.dp, vertical = 20.dp),
+                        .padding(
+                            horizontal = (30 * scale).dp,
+                            vertical = (20 * scale).dp
+                        ),
+
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    CircleMenuButton(icon = R.drawable.ic_history, onClick = onHistoryClicked)
-                    CircleMenuButton(icon = R.drawable.ic_setting, onClick = onSettingClicked)
+
+                    CircleMenuButton(
+                        icon = R.drawable.ic_history,
+                        size = (50 * buttonScale).dp,
+                        onClick = onHistoryClicked
+                    )
+
+                    CircleMenuButton(
+                        icon = R.drawable.ic_setting,
+                        size = (50 * buttonScale).dp,
+                        onClick = onSettingClicked
+                    )
                 }
             }
         }
@@ -193,51 +335,78 @@ fun MainMenuScreen(
 }
 
 @Composable
-fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
-    val kidsFont = FontFamily(Font(R.font.word_quest))
-    val gameRoundDimValues = listOf(4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+fun GridSize(
+    selectedIndex: Int,
+    scale: Float,
+    textScale: Float,
+    onIndexChange: (Int) -> Unit
+) {
 
-    Box(modifier = Modifier.fillMaxWidth()) {
+    val kidsFont = FontFamily(Font(R.font.word_quest))
+
+    val gameRoundDimValues =
+        listOf(4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = (10 * scale).dp)
+    ) {
+
         Image(
             painter = painterResource(id = R.drawable.grid_sizee),
             contentDescription = null,
             modifier = Modifier.fillMaxWidth(),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.FillWidth
         )
+
         Column(
-            modifier = Modifier.padding(top = 10.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .matchParentSize(),
+
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
+
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
+
                 Image(
                     painter = painterResource(id = R.drawable.grid_size_txt),
-                    contentDescription = "Grid Size",
-                    modifier = Modifier.height(24.dp)
+                    contentDescription = null,
+                    modifier = Modifier.height((35 * scale).dp)
                 )
             }
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 5.dp, start = 16.dp, end = 16.dp),
-                horizontalArrangement = Arrangement.Center,
+                    .padding(horizontal = (16 * scale).dp),
+
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RoundIconButton(icon = R.drawable.back_arrow, rotate = 0f) {
-                    if (selectedIndex > 0) onIndexChange(selectedIndex - 1)
+
+                RoundIconButton(
+                    icon = R.drawable.back_arrow,
+                    rotate = 0f,
+                    boxSize = (62 * buttonScale(scale)).dp
+                ) {
+
+                    if (selectedIndex > 0) {
+                        onIndexChange(selectedIndex - 1)
+                    }
                 }
 
                 Box(
                     modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
+
                     OutlinedText(
                         text = "${gameRoundDimValues[selectedIndex]} x ${gameRoundDimValues[selectedIndex]}",
-                        fontSize = 60.sp,
+                        fontSize = (60 * textScale).sp,
                         fontFamily = kidsFont,
                         fillColor = Color.White,
                         strokeColor = Color(0xFFEC4899),
@@ -245,8 +414,15 @@ fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
                     )
                 }
 
-                RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f) {
-                    if (selectedIndex < gameRoundDimValues.size - 1) onIndexChange(selectedIndex + 1)
+                RoundIconButton(
+                    icon = R.drawable.back_arrow,
+                    rotate = 180f,
+                    boxSize = (62 * buttonScale(scale)).dp
+                ) {
+
+                    if (selectedIndex < gameRoundDimValues.size - 1) {
+                        onIndexChange(selectedIndex + 1)
+                    }
                 }
             }
         }
@@ -257,12 +433,25 @@ fun GridSize(selectedIndex: Int, onIndexChange: (Int) -> Unit) {
 fun GameModeSelector(
     selectedGameMode: GameMode,
     selectedDifficulty: Difficulty,
+    scale: Float,
+    textScale: Float,
     onChange: (GameMode, Difficulty) -> Unit
 ) {
+
     val kidsFont = FontFamily(Font(R.font.word_quest))
 
-    val gameModes = listOf(GameMode.Normal, GameMode.Hidden, GameMode.CountDown, GameMode.Marathon)
-    val difficulties = listOf(Difficulty.Easy, Difficulty.Medium, Difficulty.Hard)
+    val gameModes = listOf(
+        GameMode.Normal,
+        GameMode.Hidden,
+        GameMode.CountDown,
+        GameMode.Marathon
+    )
+
+    val difficulties = listOf(
+        Difficulty.Easy,
+        Difficulty.Medium,
+        Difficulty.Hard
+    )
 
     val gameModeNames = mapOf(
         GameMode.Normal to "RELAX",
@@ -270,6 +459,7 @@ fun GameModeSelector(
         GameMode.CountDown to "COUNTDOWN",
         GameMode.Marathon to "MARATHON"
     )
+
     val difficultyNames = mapOf(
         Difficulty.Easy to "EASY",
         Difficulty.Medium to "MEDIUM",
@@ -279,7 +469,10 @@ fun GameModeSelector(
     val currentModeIndex = gameModes.indexOf(selectedGameMode)
     val currentDiffIndex = difficulties.indexOf(selectedDifficulty)
 
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+
         Image(
             painter = painterResource(id = R.drawable.game_mode),
             contentDescription = null,
@@ -288,103 +481,191 @@ fun GameModeSelector(
         )
 
         Column(
-            modifier = Modifier.padding(top = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxWidth()
+                .matchParentSize(),
+
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 20.dp),
+                    .padding(top = (20 * scale).dp),
+
                 horizontalArrangement = Arrangement.Center
             ) {
+
                 Image(
                     painter = painterResource(id = R.drawable.game_mode_txt),
-                    contentDescription = "Game Mode",
-                    modifier = Modifier.height(24.dp)
+                    contentDescription = null,
+                    modifier = Modifier.height((24 * scale).dp)
                 )
             }
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 40.dp),
+                    .padding(horizontal = (40 * scale).dp),
+
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RoundIconButton(icon = R.drawable.back_arrow, rotate = 0f, boxSize = 30.dp) {
-                    val newIndex = if (currentModeIndex > 0) currentModeIndex - 1 else gameModes.size - 1
-                    onChange(gameModes[newIndex], selectedDifficulty)
+
+                RoundIconButton(
+                    icon = R.drawable.back_arrow,
+                    rotate = 0f,
+                    boxSize = (45 * buttonScale(scale)).dp
+                ) {
+
+                    val newIndex =
+                        if (currentModeIndex > 0)
+                            currentModeIndex - 1
+                        else
+                            gameModes.size - 1
+
+                    onChange(
+                        gameModes[newIndex],
+                        selectedDifficulty
+                    )
                 }
+
                 Box(
                     modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
+
                     OutlinedText(
                         text = gameModeNames[selectedGameMode] ?: "RELAX",
-                        fontSize = 15.sp,
+                        fontSize = (20 * textScale).sp,
                         fontFamily = kidsFont,
                         fillColor = Color.White,
                         strokeColor = Color(0xFFEC4899),
                         strokeWidth = 10f
                     )
                 }
-                RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f, boxSize = 30.dp) {
-                    val newIndex = if (currentModeIndex < gameModes.size - 1) currentModeIndex + 1 else 0
-                    onChange(gameModes[newIndex], selectedDifficulty)
+
+                RoundIconButton(
+                    icon = R.drawable.back_arrow,
+                    rotate = 180f,
+                    boxSize = (45 * buttonScale(scale)).dp
+                ) {
+
+                    val newIndex =
+                        if (currentModeIndex < gameModes.size - 1)
+                            currentModeIndex + 1
+                        else
+                            0
+
+                    onChange(
+                        gameModes[newIndex],
+                        selectedDifficulty
+                    )
                 }
             }
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 50.dp),
+                    .padding(horizontal = (80 * scale).dp)
+                    .padding(bottom = (10 * scale).dp),
+
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RoundIconButton(icon = R.drawable.back_arrow, rotate = 0f, boxSize = 30.dp) {
-                    val newIndex = if (currentDiffIndex > 0) currentDiffIndex - 1 else difficulties.size - 1
-                    onChange(selectedGameMode, difficulties[newIndex])
+
+                RoundIconButton(
+                    icon = R.drawable.back_arrow,
+                    rotate = 0f,
+                    boxSize = (40 * buttonScale(scale)).dp
+                ) {
+
+                    val newIndex =
+                        if (currentDiffIndex > 0)
+                            currentDiffIndex - 1
+                        else
+                            difficulties.size - 1
+
+                    onChange(
+                        selectedGameMode,
+                        difficulties[newIndex]
+                    )
                 }
+
                 Box(
                     modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
+
                     OutlinedText(
                         text = difficultyNames[selectedDifficulty] ?: "EASY",
-                        fontSize = 15.sp,
+                        fontSize = (20 * textScale).sp,
                         fontFamily = kidsFont,
                         fillColor = Color.White,
                         strokeColor = Color(0xFFEC4899),
                         strokeWidth = 10f
                     )
                 }
-                RoundIconButton(icon = R.drawable.back_arrow, rotate = 180f, boxSize = 30.dp) {
-                    val newIndex = if (currentDiffIndex < difficulties.size - 1) currentDiffIndex + 1 else 0
-                    onChange(selectedGameMode, difficulties[newIndex])
+
+                RoundIconButton(
+                    icon = R.drawable.back_arrow,
+                    rotate = 180f,
+                    boxSize = (40 * buttonScale(scale)).dp
+                ) {
+
+                    val newIndex =
+                        if (currentDiffIndex < difficulties.size - 1)
+                            currentDiffIndex + 1
+                        else
+                            0
+
+                    onChange(
+                        selectedGameMode,
+                        difficulties[newIndex]
+                    )
                 }
             }
         }
     }
 }
 
+fun buttonScale(scale: Float): Float {
+    return when {
+        scale > 1.1f -> 1.08f
+        scale > 1f -> 1.03f
+        else -> 1f
+    }
+}
+
 @Composable
-fun PlayButton(onClick: () -> Unit) {
+fun PlayButton(
+    scale: Float,
+    onClick: () -> Unit
+) {
+
     Image(
         painter = painterResource(id = R.drawable.play_btn),
         contentDescription = "Play",
+
         modifier = Modifier
-            .width(150.dp)
-            .height(58.dp)
+            .width((145 * scale).dp)
+            .height((56 * scale).dp)
             .clip(RoundedCornerShape(49.dp))
             .clickable { onClick() }
     )
 }
 
 @Composable
-fun CircleMenuButton(icon: Int, size: Dp = 55.dp, onClick: () -> Unit) {
+fun CircleMenuButton(
+    icon: Int,
+    size: Dp = 55.dp,
+    onClick: () -> Unit
+) {
+
     Image(
         painter = painterResource(id = icon),
         contentDescription = null,
+
         modifier = Modifier
             .size(size)
             .clip(CircleShape)
@@ -403,15 +684,19 @@ fun OutlinedText(
     strokeWidth: Float = 14f,
     letterSpacing: TextUnit = 3.sp
 ) {
+
     Box(modifier = modifier) {
+
         Text(
             text = text,
+
             style = TextStyle(
                 fontSize = fontSize,
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = letterSpacing,
                 color = Color(0xFFEC4899),
+
                 drawStyle = Stroke(
                     width = strokeWidth + 15f,
                     join = StrokeJoin.Round,
@@ -419,14 +704,17 @@ fun OutlinedText(
                 )
             )
         )
+
         Text(
             text = text,
+
             style = TextStyle(
                 fontSize = fontSize,
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = letterSpacing,
                 color = strokeColor,
+
                 drawStyle = Stroke(
                     width = strokeWidth + 6f,
                     join = StrokeJoin.Round,
@@ -434,14 +722,17 @@ fun OutlinedText(
                 )
             )
         )
+
         Text(
             text = text,
+
             style = TextStyle(
                 fontSize = fontSize,
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = letterSpacing,
                 color = fillColor,
+
                 drawStyle = Stroke(
                     width = strokeWidth,
                     join = StrokeJoin.Round,
@@ -449,8 +740,10 @@ fun OutlinedText(
                 )
             )
         )
+
         Text(
             text = text,
+
             style = TextStyle(
                 fontSize = fontSize,
                 fontFamily = fontFamily,
@@ -463,18 +756,27 @@ fun OutlinedText(
 }
 
 @Composable
-fun RoundIconButton(icon: Int, rotate: Float, boxSize: Dp = 70.dp, onClick: () -> Unit) {
+fun RoundIconButton(
+    icon: Int,
+    rotate: Float,
+    boxSize: Dp = 70.dp,
+    onClick: () -> Unit
+) {
+
     Box(
         modifier = Modifier
             .size(boxSize)
             .clip(CircleShape)
             .background(Color.White.copy(alpha = 0.15f))
             .clickable { onClick() },
+
         contentAlignment = Alignment.Center
     ) {
+
         Image(
             painter = painterResource(id = icon),
             contentDescription = null,
+
             modifier = Modifier
                 .size(boxSize * 0.9f)
                 .rotate(rotate)
@@ -488,14 +790,17 @@ fun RoundIconButton(icon: Int, rotate: Float, boxSize: Dp = 70.dp, onClick: () -
     heightDp = PreviewDevices.PHONE_HEIGHT,
     name = "Phone"
 )
+
 @Preview(
     showBackground = true,
     widthDp = PreviewDevices.TABLET_WIDTH,
     heightDp = PreviewDevices.TABLET_HEIGHT,
     name = "Tablet"
 )
+
 @Composable
 fun MainMenuScreenPreview() {
+
     MainMenuScreen(
         onPlayClicked = { _, _, _, _ -> },
         onSettingClicked = {},
